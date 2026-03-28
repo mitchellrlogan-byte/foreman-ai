@@ -6,6 +6,7 @@ import { initDb } from "./db.js";
 import { registerProjectTools } from "./tools/projects.js";
 import { registerItemTools } from "./tools/items.js";
 import { registerSmartTools } from "./tools/smart.js";
+import { registerSessionTools } from "./tools/sessions.js";
 import path from "path";
 import os from "os";
 
@@ -34,6 +35,7 @@ async function main(): Promise<void> {
   registerProjectTools(server);
   registerItemTools(server);
   registerSmartTools(server);
+  registerSessionTools(server);
 
   const transport = new StdioServerTransport();
   await server.connect(transport);
