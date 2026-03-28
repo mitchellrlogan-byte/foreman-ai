@@ -21,6 +21,7 @@ node dist/index.js --db ~/.foreman/foreman.db
 - `src/tools/projects.ts` — pm_register_project, pm_list_projects
 - `src/tools/items.ts` — CRUD tools (add, update, list, get, delete)
 - `src/tools/smart.ts` — pm_next_work, pm_prioritize, pm_bulk_import
+- `src/tools/sessions.ts` — pm_start_session, pm_end_session, pm_list_sessions
 
 ## Conventions
 - All tool names prefixed with `pm_`

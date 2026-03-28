@@ -1,6 +1,6 @@
 {
   "name": "foreman-ai",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "description": "AI Project Manager MCP server — persistent, cross-project backlog management for Claude Code",
   "main": "dist/index.js",
