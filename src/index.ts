@@ -7,14 +7,26 @@ import { registerProjectTools } from "./tools/projects.js";
 import { registerItemTools } from "./tools/items.js";
 import { registerSmartTools } from "./tools/smart.js";
 import { registerSessionTools } from "./tools/sessions.js";
+import { startWebServer } from "./web/server.js";
 import path from "path";
 import os from "os";
 
-function getDbPath(): string {
+function getArg(flag: string): string | undefined {
   const args = process.argv.slice(2);
-  const dbIndex = args.indexOf("--db");
-  if (dbIndex !== -1 && args[dbIndex + 1]) {
-    const raw = args[dbIndex + 1];
+  const idx = args.indexOf(flag);
+  if (idx !== -1 && args[idx + 1]) {
+    return args[idx + 1];
+  }
+  return undefined;
+}
+
+function hasFlag(flag: string): boolean {
+  return process.argv.slice(2).includes(flag);
+}
+
+function getDbPath(): string {
+  const raw = getArg("--db");
+  if (raw) {
     if (raw.startsWith("~")) {
       return path.join(os.homedir(), raw.slice(1));
     }
@@ -27,18 +39,27 @@ async function main(): Promise<void> {
   const dbPath = getDbPath();
   initDb(dbPath);
 
-  const server = new McpServer({
-    name: "foreman-ai",
-    version: "1.1.0",
-  });
+  const webMode = hasFlag("--web");
+  const port = parseInt(getArg("--port") ?? "4040");
 
-  registerProjectTools(server);
-  registerItemTools(server);
-  registerSmartTools(server);
-  registerSessionTools(server);
+  if (webMode) {
+    // Web-only mode: start HTTP server, no MCP stdio
+    startWebServer(port);
+  } else {
+    // Default: MCP server over stdio
+    const server = new McpServer({
+      name: "foreman-ai",
+      version: "2.0.0",
+    });
 
-  const transport = new StdioServerTransport();
-  await server.connect(transport);
+    registerProjectTools(server);
+    registerItemTools(server);
+    registerSmartTools(server);
+    registerSessionTools(server);
+
+    const transport = new StdioServerTransport();
+    await server.connect(transport);
+  }
 }
 
 main().catch((err) => {
