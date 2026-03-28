@@ -91,4 +91,50 @@ export function registerSessionTools(server: McpServer): void {
       };
     }
   );
+
+  server.tool(
+    "pm_list_sessions",
+    "List past work sessions. Shows what was done and when.",
+    {
+      project_id: z.string().optional().describe("Filter by project (omit for all)"),
+      limit: z.number().int().min(1).max(50).optional().describe("Number of sessions (default 10)"),
+    },
+    async ({ project_id, limit }) => {
+      const db = getDb();
+      const max = limit ?? 10;
+
+      let query = "SELECT * FROM sessions";
+      const params: unknown[] = [];
+
+      if (project_id) {
+        query += " WHERE project_id = ?";
+        params.push(project_id);
+      }
+
+      query += " ORDER BY started_at DESC LIMIT ?";
+      params.push(max);
+
+      const rows = db.prepare(query).all(...params) as Record<string, unknown>[];
+
+      if (rows.length === 0) {
+        return {
+          content: [{ type: "text" as const, text: "No sessions found." }],
+        };
+      }
+
+      const sessions = rows.map(rowToSession);
+      const text = sessions
+        .map((s) => {
+          const duration = s.ended_at
+            ? `${Math.round((new Date(s.ended_at).getTime() - new Date(s.started_at).getTime()) / 60000)} min`
+            : "active";
+          return `**${s.project_id}** (${s.id.slice(0, 8)}) — ${s.started_at.slice(0, 16)} [${duration}]\n  ${s.summary || "No summary"}\n  Items: ${s.items_touched.length > 0 ? s.items_touched.map((id) => id.slice(0, 8)).join(", ") : "none"}`;
+        })
+        .join("\n\n");
+
+      return {
+        content: [{ type: "text" as const, text: `${sessions.length} sessions:\n\n${text}` }],
+      };
+    }
+  );
 }
