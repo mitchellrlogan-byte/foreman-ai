@@ -45,4 +45,50 @@ export function registerSessionTools(server: McpServer): void {
       };
     }
   );
+
+  server.tool(
+    "pm_end_session",
+    "End the current work session. Logs summary and items touched.",
+    {
+      project_id: z.string().describe("Project slug"),
+      summary: z.string().optional().describe("What was accomplished this session"),
+      items_touched: z.array(z.string()).optional().describe("Array of item IDs worked on"),
+    },
+    async ({ project_id, summary, items_touched }) => {
+      const db = getDb();
+      const now = new Date().toISOString();
+
+      // Find the open session for this project
+      const session = db.prepare(
+        "SELECT * FROM sessions WHERE project_id = ? AND ended_at IS NULL ORDER BY started_at DESC LIMIT 1"
+      ).get(project_id) as Record<string, unknown> | undefined;
+
+      if (!session) {
+        return {
+          content: [{ type: "text" as const, text: `No active session for '${project_id}'. Start one with pm_start_session.` }],
+        };
+      }
+
+      db.prepare(
+        "UPDATE sessions SET ended_at = ?, summary = ?, items_touched = ? WHERE id = ?"
+      ).run(
+        now,
+        summary ?? "",
+        JSON.stringify(items_touched ?? []),
+        session.id as string
+      );
+
+      const startedAt = session.started_at as string;
+      const startTime = new Date(startedAt).getTime();
+      const endTime = new Date(now).getTime();
+      const durationMin = Math.round((endTime - startTime) / 60000);
+
+      return {
+        content: [{
+          type: "text" as const,
+          text: `Session ended (${(session.id as string).slice(0, 8)}). Duration: ${durationMin} minutes. ${(items_touched ?? []).length} items touched.`,
+        }],
+      };
+    }
+  );
 }
