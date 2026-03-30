@@ -5,6 +5,20 @@ import path from "path";
 import fs from "fs";
 import { execFileNoThrow } from "../utils/execFileNoThrow.js";
 
+/** Find the claude CLI binary. Falls back to well-known install paths if not in PATH. */
+function resolveClaude(): string {
+  // Well-known fallback locations (ordered by preference)
+  const candidates = [
+    path.join(os.homedir(), ".local", "bin", "claude.exe"),
+    path.join(os.homedir(), "AppData", "Roaming", "Claude", "claude-code", "2.1.87", "claude.exe"),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) return candidate;
+  }
+  // Default: let PATH resolve it (will fail with a clear message via execFileNoThrow)
+  return "claude";
+}
+
 export interface RunResult {
   started: boolean;
   reason?: string;
@@ -100,8 +114,11 @@ export async function run(db: Database.Database): Promise<RunResult> {
     ? eligible.repo_path
     : os.homedir();
 
+  // Resolve claude binary: prefer ~/.local/bin/claude.exe on Windows if global "claude" is not in PATH
+  const claudeBin = resolveClaude();
+
   const result = await execFileNoThrow(
-    "claude",
+    claudeBin,
     ["--print", "--dangerously-skip-permissions", "-p", prompt],
     { cwd, timeoutMs: 30 * 60 * 1000 }
   );

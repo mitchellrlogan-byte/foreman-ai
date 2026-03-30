@@ -1,4 +1,5 @@
 import { execFile } from "child_process";
+import path from "path";
 
 export interface ExecResult {
   exitCode: number;
@@ -18,9 +19,11 @@ export function execFileNoThrow(
   args: string[],
   options: { cwd?: string; timeoutMs?: number } = {}
 ): Promise<ExecResult> {
-  // On Windows, npm global binaries are .cmd wrappers
+  // On Windows, npm global binaries are .cmd wrappers (unless caller passes full path or .exe)
   const resolvedFile =
-    process.platform === "win32" && !file.includes(".") ? `${file}.cmd` : file;
+    process.platform === "win32" && !path.isAbsolute(file) && !file.includes(".")
+      ? `${file}.cmd`
+      : file;
 
   return new Promise((resolve) => {
     const { cwd, timeoutMs = 30 * 60 * 1000 } = options;
