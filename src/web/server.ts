@@ -6,6 +6,10 @@ import { projectsRouter } from "./routes/projects.js";
 import { itemsRouter, nextWorkRouter } from "./routes/items.js";
 import { sessionsRouter } from "./routes/sessions.js";
 import { scanRouter } from "./routes/scan.js";
+import { settingsRouter } from "./routes/settings.js";
+import { executeRouter } from "./routes/execute.js";
+import { startScheduler } from "../executor/scheduler.js";
+import { getDb } from "../db.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -22,6 +26,17 @@ export function startWebServer(port: number): void {
   app.use("/api/next-work", nextWorkRouter);
   app.use("/api/sessions", sessionsRouter);
   app.use("/api/scan-projects", scanRouter);
+  app.use("/api/settings", settingsRouter);
+  app.use("/api/execute", executeRouter);
+
+  // Start Mode B scheduler if enabled
+  const db = getDb();
+  const modeBRow = db
+    .prepare("SELECT value FROM settings WHERE key = 'mode_b_enabled'")
+    .get() as { value: string } | undefined;
+  if (modeBRow?.value === "true") {
+    startScheduler(db);
+  }
 
   // Health check
   app.get("/api/health", (_req, res) => {
