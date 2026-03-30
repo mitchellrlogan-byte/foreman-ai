@@ -1,4 +1,3 @@
-import { StatusBadge } from "./StatusBadge";
 import type { Item } from "../lib/api";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string }> = {
