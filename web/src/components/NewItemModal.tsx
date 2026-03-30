@@ -28,6 +28,7 @@ export function NewItemModal({ projects, defaultProjectId, onClose, onCreated }:
         category,
         effort: effort as Item["effort"] || undefined,
         source: "user",
+        execution_mode: "auto",
       });
       onCreated(item);
       onClose();

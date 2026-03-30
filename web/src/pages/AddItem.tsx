@@ -9,7 +9,7 @@ export function AddItem() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("feature");
   const [effort, setEffort] = useState("");
-  const [executionMode, setExecutionMode] = useState("manual");
+  const [executionMode, setExecutionMode] = useState("auto");
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
