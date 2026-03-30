@@ -73,6 +73,9 @@ export interface Item {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  execution_status: string | null;
+  last_executed_at: string | null;
+  execution_output: string | null;
 }
 
 export interface ScanResult {
@@ -113,4 +116,13 @@ export const api = {
   },
   scanProjects: (path: string) =>
     request<ScanResult[]>(`/scan-projects?path=${encodeURIComponent(path)}`),
+  settings: {
+    get: () => request<{ mode_a_enabled: boolean; mode_b_enabled: boolean; mode_b_interval_minutes: number }>("/settings"),
+    update: (data: Partial<{ mode_a_enabled: boolean; mode_b_enabled: boolean; mode_b_interval_minutes: number }>) =>
+      request<{ mode_a_enabled: boolean; mode_b_enabled: boolean; mode_b_interval_minutes: number }>("/settings", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+  },
+  execute: () => request<{ started: boolean; reason?: string; item_id?: string; execution_status?: string }>("/execute", { method: "POST" }),
 };

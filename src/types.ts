@@ -4,6 +4,21 @@ export type Effort = "small" | "medium" | "large";
 export type Source = "user" | "claude" | "auto";
 export type ExecutionMode = "manual" | "auto";
 
+export type ExecutionStatus = "queued" | "running" | "done" | "failed";
+
+export interface ExecutionSettings {
+  mode_a_enabled: boolean;
+  mode_b_enabled: boolean;
+  mode_b_interval_minutes: number;
+}
+
+export interface ExecuteResult {
+  started: boolean;
+  reason?: string;
+  item_id?: string;
+  execution_status?: ExecutionStatus;
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -32,6 +47,9 @@ export interface Item {
   created_at: string;
   updated_at: string;
   completed_at: string | null;
+  execution_status: ExecutionStatus | null;
+  last_executed_at: string | null;
+  execution_output: string | null;
 }
 
 export interface Session {
