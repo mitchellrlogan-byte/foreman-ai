@@ -1,10 +1,25 @@
 const BASE = "/api";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const apiKey = localStorage.getItem("foreman_api_key");
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (apiKey) {
+    headers["x-api-key"] = apiKey;
+  }
+
   const res = await fetch(`${BASE}${path}`, {
-    headers: { "Content-Type": "application/json" },
+    headers,
     ...options,
   });
+
+  if (res.status === 401) {
+    localStorage.removeItem("foreman_api_key");
+    window.dispatchEvent(new Event("foreman:unauthorized"));
+    throw new Error("UNAUTHORIZED");
+  }
 
   if (!res.ok) {
     const err = await res.json().catch(() => ({ error: res.statusText }));
@@ -13,6 +28,22 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   return res.json();
 }
+
+export const auth = {
+  getKey: () => localStorage.getItem("foreman_api_key"),
+  setKey: (key: string) => localStorage.setItem("foreman_api_key", key),
+  clearKey: () => localStorage.removeItem("foreman_api_key"),
+  isProtected: async () => {
+    // Check if the API requires a key by hitting health endpoint without one
+    // Health endpoint is unauthenticated, so we check items instead
+    try {
+      await request<unknown>("/projects");
+      return false; // No auth required
+    } catch (e) {
+      return e instanceof Error && e.message === "UNAUTHORIZED";
+    }
+  },
+};
 
 export interface Project {
   id: string;
