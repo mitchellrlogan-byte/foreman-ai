@@ -62,4 +62,14 @@ export const api = {
     delete: (id: string) =>
       request<{ deleted: boolean }>(`/items/${id}`, { method: "DELETE" }),
   },
+  nextWork: (params?: { project_id?: string; limit?: number }) => {
+    const qs = params ? "?" + new URLSearchParams(
+      Object.fromEntries(
+        Object.entries(params)
+          .filter(([, v]) => v != null)
+          .map(([k, v]) => [k, String(v)])
+      )
+    ).toString() : "";
+    return request<Item[]>(`/next-work${qs}`);
+  },
 };
