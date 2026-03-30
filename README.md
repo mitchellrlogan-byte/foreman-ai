@@ -8,9 +8,9 @@
 
 ---
 
-<!-- TODO: add dashboard screenshot after v2.1 frontend is built -->
-<!-- Take a screenshot of http://localhost:4040 after running `npm run dashboard`, save to docs/screenshots/dashboard.png -->
-<!-- ![Foreman AI Dashboard](docs/screenshots/dashboard.png) -->
+![Foreman AI Dashboard](docs/screenshots/dashboard.png)
+
+![Foreman AI Execution Page](docs/screenshots/execution.png)
 
 ## The problem
 
