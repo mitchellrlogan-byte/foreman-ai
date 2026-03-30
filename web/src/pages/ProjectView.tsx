@@ -35,6 +35,10 @@ export function ProjectView() {
     setSelectedItem(null);
   }
 
+  function handleCreated(item: Item) {
+    setItems(prev => [...prev, item]);
+  }
+
   if (loading) return <div className="flex items-center justify-center h-64 text-[#1e4060] text-sm">Loading...</div>;
   if (!project) return <div className="flex items-center justify-center h-64 text-[#f87171] text-sm">Project not found.</div>;
 
@@ -76,7 +80,7 @@ export function ProjectView() {
       {/* Content */}
       <div className="flex-1 overflow-auto p-5">
         {view === "board" ? (
-          <BoardView items={visibleItems} onSelect={setSelectedItem} />
+          <BoardView items={visibleItems} projectId={id!} onSelect={setSelectedItem} onCreated={handleCreated} />
         ) : (
           <TableView items={visibleItems} onSelect={setSelectedItem} />
         )}
@@ -92,7 +96,12 @@ export function ProjectView() {
   );
 }
 
-function BoardView({ items, onSelect }: { items: Item[]; onSelect: (item: Item) => void }) {
+function BoardView({ items, projectId, onSelect, onCreated }: {
+  items: Item[];
+  projectId: string;
+  onSelect: (item: Item) => void;
+  onCreated: (item: Item) => void;
+}) {
   const COL_LABELS: Record<string, string> = {
     backlog: "Backlog", ready: "Ready", in_progress: "In Progress", done: "Done",
   };
@@ -120,9 +129,75 @@ function BoardView({ items, onSelect }: { items: Item[]; onSelect: (item: Item) 
                 <div className="text-[10px] text-[#1e4060] text-center py-4">—</div>
               )}
             </div>
+            <QuickAdd projectId={projectId} status={status} onCreated={onCreated} />
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function QuickAdd({ projectId, status, onCreated }: {
+  projectId: string;
+  status: string;
+  onCreated: (item: Item) => void;
+}) {
+  const [active, setActive] = useState(false);
+  const [title, setTitle] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit() {
+    if (!title.trim()) return;
+    setSaving(true);
+    try {
+      const item = await api.items.create({ project_id: projectId, title: title.trim(), status, source: "user" });
+      onCreated(item);
+      setTitle("");
+      setActive(false);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  if (!active) {
+    return (
+      <button
+        onClick={() => setActive(true)}
+        className="w-full text-left text-[10px] text-[#1e4060] hover:text-[#4b6a8a] px-1 py-1.5 transition-colors"
+      >
+        + Add item
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-1">
+      <input
+        autoFocus
+        value={title}
+        onChange={e => setTitle(e.target.value)}
+        onKeyDown={e => {
+          if (e.key === "Enter") handleSubmit();
+          if (e.key === "Escape") { setActive(false); setTitle(""); }
+        }}
+        placeholder="Item title..."
+        disabled={saving}
+        className="w-full bg-[#0a1628] border border-[#0ea5e9] rounded px-2 py-1.5 text-[11px] text-[#e0f2fe] focus:outline-none placeholder:text-[#1e4060]"
+      />
+      <div className="flex gap-1 mt-1">
+        <button
+          onClick={handleSubmit} disabled={saving || !title.trim()}
+          className="text-[10px] px-2 py-1 bg-[#0ea5e9] text-white rounded disabled:opacity-50"
+        >
+          {saving ? "..." : "Add"}
+        </button>
+        <button
+          onClick={() => { setActive(false); setTitle(""); }}
+          className="text-[10px] px-2 py-1 text-[#4b6a8a] hover:text-[#94a3b8]"
+        >
+          Cancel
+        </button>
+      </div>
     </div>
   );
 }
