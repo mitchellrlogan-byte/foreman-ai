@@ -32,6 +32,9 @@ function getDbPath(): string {
     }
     return path.resolve(raw);
   }
+  if (process.env.FOREMAN_DB) {
+    return process.env.FOREMAN_DB;
+  }
   return path.join(os.homedir(), ".foreman", "foreman.db");
 }
 
