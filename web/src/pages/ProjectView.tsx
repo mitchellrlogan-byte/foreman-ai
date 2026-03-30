@@ -1,75 +1,162 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api, type Item, type Project } from "../lib/api";
 import { ItemCard } from "../components/ItemCard";
+import { ItemDrawer } from "../components/ItemDrawer";
+import { StatusBadge } from "../components/StatusBadge";
 
-type StatusTab = "backlog" | "ready" | "in_progress" | "done" | "all";
+type ViewMode = "board" | "table";
+const BOARD_STATUSES = ["backlog", "ready", "in_progress", "done"] as const;
 
 export function ProjectView() {
   const { id } = useParams<{ id: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [items, setItems] = useState<Item[]>([]);
-  const [tab, setTab] = useState<StatusTab>("all");
+  const [view, setView] = useState<ViewMode>("board");
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  const load = useCallback(() => {
     if (!id) return;
-    Promise.all([
-      api.projects.get(id),
-      api.items.list({ project_id: id }),
-    ]).then(([p, i]) => {
-      setProject(p);
-      setItems(i);
-      setLoading(false);
-    });
+    Promise.all([api.projects.get(id), api.items.list({ project_id: id })])
+      .then(([p, i]) => { setProject(p); setItems(i); setLoading(false); })
+      .catch(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="p-8 text-gray-500">Loading...</div>;
-  if (!project) return <div className="p-8 text-red-500">Project not found.</div>;
+  useEffect(() => { load(); }, [load]);
 
-  const filtered = tab === "all" ? items : items.filter((i) => i.status === tab);
-  const tabs: StatusTab[] = ["all", "backlog", "ready", "in_progress", "done"];
+  function handleUpdated(updated: Item) {
+    setItems(prev => prev.map(i => i.id === updated.id ? updated : i));
+    setSelectedItem(updated);
+  }
+
+  function handleDeleted(deletedId: string) {
+    setItems(prev => prev.filter(i => i.id !== deletedId));
+    setSelectedItem(null);
+  }
+
+  if (loading) return <div className="flex items-center justify-center h-64 text-[#1e4060] text-sm">Loading...</div>;
+  if (!project) return <div className="flex items-center justify-center h-64 text-[#f87171] text-sm">Project not found.</div>;
+
+  const visibleItems = items.filter(i => i.status !== "archived");
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <Link to="/" className="text-sm text-blue-600 hover:underline">&larr; Dashboard</Link>
-
-      <h1 className="text-2xl font-bold text-gray-900 mt-2">{project.name}</h1>
-      <p className="text-gray-500 text-sm mb-6">{project.description}</p>
-
-      <div className="flex gap-1 mb-4 overflow-x-auto">
-        {tabs.map((t) => {
-          const count = t === "all" ? items.length : items.filter((i) => i.status === t).length;
-          return (
+    <div className="flex flex-col h-full">
+      {/* Topbar */}
+      <div className="h-[52px] border-b border-[#132030] flex items-center px-5 gap-3 flex-shrink-0">
+        <div className="flex-1">
+          <span className="text-[14px] font-bold text-[#e0f2fe]">{project.name}</span>
+          {project.description && (
+            <span className="ml-2 text-[11px] text-[#4b6a8a]">{project.description}</span>
+          )}
+        </div>
+        {/* View toggle */}
+        <div className="flex bg-[#0a1628] border border-[#1a3a5c] rounded-md overflow-hidden">
+          {(["board", "table"] as ViewMode[]).map(v => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors ${
-                tab === t
-                  ? "bg-gray-900 text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-3 py-1.5 text-[11px] font-medium transition-colors capitalize ${
+                view === v ? "bg-[#0c2d4a] text-[#38bdf8]" : "text-[#4b6a8a] hover:text-[#94a3b8]"
               }`}
             >
-              {t.replace("_", " ")} ({count})
+              {v === "board" ? "⊟ Board" : "☰ Table"}
             </button>
-          );
-        })}
+          ))}
+        </div>
+        <Link
+          to={`/project/${id}/add`}
+          className="px-3 py-1.5 text-[11px] font-semibold text-white rounded-md transition-colors"
+          style={{ background: "linear-gradient(135deg, #0ea5e9, #0284c7)" }}
+        >
+          + Add Item
+        </Link>
       </div>
 
-      <Link
-        to={`/project/${id}/add`}
-        className="inline-block mb-4 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700"
-      >
-        + Add Item
-      </Link>
-
-      <div className="space-y-2">
-        {filtered.length === 0 ? (
-          <p className="text-gray-500 text-sm">No items.</p>
+      {/* Content */}
+      <div className="flex-1 overflow-auto p-5">
+        {view === "board" ? (
+          <BoardView items={visibleItems} onSelect={setSelectedItem} />
         ) : (
-          filtered.map((item) => <ItemCard key={item.id} item={item} />)
+          <TableView items={visibleItems} onSelect={setSelectedItem} />
         )}
       </div>
+
+      <ItemDrawer
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+        onUpdated={handleUpdated}
+        onDeleted={handleDeleted}
+      />
+    </div>
+  );
+}
+
+function BoardView({ items, onSelect }: { items: Item[]; onSelect: (item: Item) => void }) {
+  const COL_LABELS: Record<string, string> = {
+    backlog: "Backlog", ready: "Ready", in_progress: "In Progress", done: "Done",
+  };
+  const COL_COLORS: Record<string, string> = {
+    backlog: "#4b6a8a", ready: "#34d399", in_progress: "#38bdf8", done: "#4b6a8a",
+  };
+
+  return (
+    <div className="flex gap-3 h-full min-h-[400px]">
+      {BOARD_STATUSES.map(status => {
+        const col = items.filter(i => i.status === status);
+        return (
+          <div key={status} className="flex-1 flex flex-col min-w-0">
+            <div className="flex items-center justify-between mb-2.5 px-0.5">
+              <span className="text-[10px] font-bold uppercase tracking-[1px]" style={{ color: COL_COLORS[status] }}>
+                {COL_LABELS[status]}
+              </span>
+              <span className="text-[10px] bg-[#0a1628] text-[#4b6a8a] px-1.5 py-0.5 rounded-full">{col.length}</span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {col.map(item => (
+                <ItemCard key={item.id} item={item} onClick={() => onSelect(item)} />
+              ))}
+              {col.length === 0 && (
+                <div className="text-[10px] text-[#1e4060] text-center py-4">—</div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function TableView({ items, onSelect }: { items: Item[]; onSelect: (item: Item) => void }) {
+  const sorted = [...items].sort((a, b) => a.priority - b.priority || (b.roi_score ?? 0) - (a.roi_score ?? 0));
+
+  return (
+    <div className="w-full">
+      <div className="grid gap-2 px-2.5 pb-2 text-[9px] font-bold uppercase tracking-[0.8px] text-[#1e4060] border-b border-[#132030]"
+        style={{ gridTemplateColumns: "1fr 100px 50px 50px 80px" }}>
+        <span>Title</span>
+        <span>Status</span>
+        <span>Pri</span>
+        <span>ROI</span>
+        <span>Effort</span>
+      </div>
+      {sorted.map(item => (
+        <div
+          key={item.id}
+          className="grid gap-2 px-2.5 py-2.5 items-center border-b border-[#0d1a26] cursor-pointer hover:bg-[#0c1e30] transition-colors"
+          style={{ gridTemplateColumns: "1fr 100px 50px 50px 80px" }}
+          onClick={() => onSelect(item)}
+        >
+          <span className="text-[12px] text-[#bfdbfe] truncate">{item.title}</span>
+          <span><StatusBadge status={item.status} /></span>
+          <span className="text-[12px] font-bold text-[#0ea5e9]">{item.priority}</span>
+          <span className="text-[11px] font-semibold text-[#10b981]">{item.roi_score ?? "—"}</span>
+          <span className="text-[10px] text-[#4b6a8a] capitalize">{item.effort ?? "—"}</span>
+        </div>
+      ))}
+      {sorted.length === 0 && (
+        <div className="text-[12px] text-[#1e4060] text-center py-8">No items. Add one above.</div>
+      )}
     </div>
   );
 }
