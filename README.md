@@ -8,6 +8,10 @@
 
 ---
 
+<!-- TODO: add dashboard screenshot after v2.1 frontend is built -->
+<!-- Take a screenshot of http://localhost:4040 after running `npm run dashboard`, save to docs/screenshots/dashboard.png -->
+<!-- ![Foreman AI Dashboard](docs/screenshots/dashboard.png) -->
+
 ## The problem
 
 Every Claude Code session starts from scratch.
@@ -199,6 +203,39 @@ Session analytics, full-text search, sort controls, enhanced `pm_next_work` disp
 
 **v2.3 — Auto-execution**
 Claude picks up `execution_mode: "auto"` items and executes them autonomously. The backlog manages itself.
+
+---
+
+## Deploy to Fly.io
+
+Run the dashboard in the cloud so it's accessible from anywhere.
+
+**Prerequisites:** [flyctl installed](https://fly.io/docs/hands-on/install-flyctl/) and logged in.
+
+```bash
+# 1. Set a unique app name in fly.toml  (app = "foreman-ai-your-name")
+
+# 2. Create the app and volume
+fly launch --no-deploy
+fly volumes create foreman_data --size 1 --region ord
+
+# 3. Set an API key (recommended for cloud)
+fly secrets set FOREMAN_API_KEY=$(openssl rand -hex 32)
+
+# 4. Deploy
+fly deploy
+```
+
+Your dashboard is live at `https://foreman-ai-your-name.fly.dev`.
+
+**Run with Docker:**
+
+```bash
+docker run -p 4040:4040 \
+  -v ~/.foreman:/data \
+  -e FOREMAN_DB=/data/foreman.db \
+  foreman-ai:latest
+```
 
 ---
 
