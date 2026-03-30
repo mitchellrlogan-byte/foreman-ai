@@ -43,7 +43,7 @@ async function main(): Promise<void> {
   initDb(dbPath);
 
   const webMode = hasFlag("--web");
-  const port = parseInt(getArg("--port") ?? "4040");
+  const port = parseInt(getArg("--port") || process.env.FOREMAN_PORT || "4040", 10);
 
   if (webMode) {
     // Web-only mode: start HTTP server, no MCP stdio

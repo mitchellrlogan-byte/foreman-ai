@@ -4,7 +4,7 @@ primary_region = "ord"
 [build]
 
 [env]
-  PORT = "4040"
+  FOREMAN_PORT = "4040"
   NODE_ENV = "production"
   FOREMAN_DB = "/data/foreman.db"
 
