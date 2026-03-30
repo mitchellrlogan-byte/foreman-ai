@@ -81,7 +81,7 @@ export function ProjectView() {
       {/* Content */}
       <div className="flex-1 overflow-auto p-5">
         {view === "board" ? (
-          <BoardView items={visibleItems} projectId={id!} onSelect={setSelectedItem} onCreated={handleCreated} onItemsChanged={setItems} />
+          <BoardView items={visibleItems} projectId={id!} onSelect={setSelectedItem} onCreated={handleCreated} onItemsChanged={setItems} onDeleted={handleDeleted} />
         ) : (
           <TableView items={visibleItems} onSelect={setSelectedItem} />
         )}
@@ -97,12 +97,13 @@ export function ProjectView() {
   );
 }
 
-function BoardView({ items, projectId, onSelect, onCreated, onItemsChanged }: {
+function BoardView({ items, projectId, onSelect, onCreated, onItemsChanged, onDeleted }: {
   items: Item[];
   projectId: string;
   onSelect: (item: Item) => void;
   onCreated: (item: Item) => void;
   onItemsChanged: (updater: (prev: Item[]) => Item[]) => void;
+  onDeleted: (id: string) => void;
 }) {
   const COL_LABELS: Record<string, string> = {
     backlog: "Backlog", ready: "Ready", in_progress: "In Progress", done: "Done",
@@ -166,6 +167,7 @@ function BoardView({ items, projectId, onSelect, onCreated, onItemsChanged }: {
             projectId={projectId}
             onSelect={onSelect}
             onCreated={onCreated}
+            onDeleted={onDeleted}
             draggingId={draggingId}
             onDrop={handleDrop}
           />
@@ -175,7 +177,7 @@ function BoardView({ items, projectId, onSelect, onCreated, onItemsChanged }: {
   );
 }
 
-function BoardColumn({ status, label, color, items, projectId, onSelect, onCreated, draggingId, onDrop }: {
+function BoardColumn({ status, label, color, items, projectId, onSelect, onCreated, onDeleted, draggingId, onDrop }: {
   status: string;
   label: string;
   color: string;
@@ -183,6 +185,7 @@ function BoardColumn({ status, label, color, items, projectId, onSelect, onCreat
   projectId: string;
   onSelect: (item: Item) => void;
   onCreated: (item: Item) => void;
+  onDeleted: (id: string) => void;
   draggingId: React.MutableRefObject<string | null>;
   onDrop: (toStatus: string, toId: string | null) => void;
 }) {
@@ -215,7 +218,7 @@ function BoardColumn({ status, label, color, items, projectId, onSelect, onCreat
             className={`transition-opacity ${dragOverId === item.id ? "opacity-40 border-t-2 border-[#0ea5e9]" : ""}`}
             style={{ cursor: "grab" }}
           >
-            <ItemCard item={item} onClick={() => onSelect(item)} />
+            <ItemCard item={item} onClick={() => onSelect(item)} onDeleted={onDeleted} />
           </div>
         ))}
         {items.length === 0 && (

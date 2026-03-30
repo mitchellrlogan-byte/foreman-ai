@@ -1,4 +1,5 @@
-import type { Item } from "../lib/api";
+import { useState } from "react";
+import { api, type Item } from "../lib/api";
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string }> = {
   feature:  { bg: "#0c2438",  text: "#38bdf8" },
@@ -7,7 +8,12 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string }> = {
   research: { bg: "#0f2a1a",  text: "#34d399" },
 };
 
-export function ItemCard({ item, onClick }: { item: Item; onClick?: () => void }) {
+export function ItemCard({ item, onClick, onDeleted }: {
+  item: Item;
+  onClick?: () => void;
+  onDeleted?: (id: string) => void;
+}) {
+  const [hovered, setHovered] = useState(false);
   const catStyle = CATEGORY_STYLES[item.category] ?? CATEGORY_STYLES.feature;
   const borderStyle = item.status === "in_progress"
     ? { borderLeft: "2px solid #0ea5e9" }
@@ -15,13 +21,28 @@ export function ItemCard({ item, onClick }: { item: Item; onClick?: () => void }
     ? { borderLeft: "2px solid #34d399" }
     : {};
 
+  function handleDelete(e: React.MouseEvent) {
+    e.stopPropagation();
+    api.items.delete(item.id).then(() => onDeleted?.(item.id)).catch(() => {});
+  }
+
   return (
     <div
-      className="bg-[#0c1e30] border border-[#132030] rounded-md p-2.5 mb-1.5 cursor-pointer transition-colors hover:border-[#1a5276]"
+      className="relative bg-[#0c1e30] border border-[#132030] rounded-md p-2.5 mb-1.5 cursor-pointer transition-colors hover:border-[#1a5276]"
       style={borderStyle}
       onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
-      <div className="text-[11px] text-[#bfdbfe] mb-1.5 leading-snug">{item.title}</div>
+      {hovered && onDeleted && (
+        <button
+          onClick={handleDelete}
+          className="absolute top-1.5 right-1.5 w-4 h-4 flex items-center justify-center rounded text-[#4b6a8a] hover:text-[#f87171] hover:bg-[#2d0f0f] transition-colors text-[10px] leading-none"
+        >
+          ×
+        </button>
+      )}
+      <div className="text-[11px] text-[#bfdbfe] mb-1.5 leading-snug pr-4">{item.title}</div>
       <div className="flex items-center gap-1.5 flex-wrap">
         <span
           className="text-[8px] px-1.5 py-0.5 rounded font-medium"
