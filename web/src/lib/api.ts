@@ -75,10 +75,18 @@ export interface Item {
   completed_at: string | null;
 }
 
+export interface ScanResult {
+  name: string;
+  path: string;
+  already_registered: boolean;
+}
+
 export const api = {
   projects: {
     list: () => request<Project[]>("/projects"),
     get: (id: string) => request<Project>(`/projects/${id}`),
+    create: (data: { id: string; name: string; repo_path: string; description?: string }) =>
+      request<Project>(`/projects/${data.id}`, { method: "PUT", body: JSON.stringify(data) }),
   },
   items: {
     list: (params?: Record<string, string>) => {
@@ -103,4 +111,6 @@ export const api = {
     ).toString() : "";
     return request<Item[]>(`/next-work${qs}`);
   },
+  scanProjects: (path: string) =>
+    request<ScanResult[]>(`/scan-projects?path=${encodeURIComponent(path)}`),
 };
