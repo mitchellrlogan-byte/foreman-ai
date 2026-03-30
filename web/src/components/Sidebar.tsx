@@ -1,8 +1,12 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import type { Project } from "../lib/api";
+import { ScanProjectsModal } from "./ScanProjectsModal";
+import { AddProjectModal } from "./AddProjectModal";
 
 interface SidebarProps {
   projects: Project[];
+  onProjectAdded: (projects: Project[]) => void;
 }
 
 const PROJECT_COLORS = [
@@ -10,8 +14,10 @@ const PROJECT_COLORS = [
   "#ef4444", "#06b6d4", "#ec4899", "#84cc16",
 ];
 
-export function Sidebar({ projects }: SidebarProps) {
+export function Sidebar({ projects, onProjectAdded }: SidebarProps) {
   const location = useLocation();
+  const [showScan, setShowScan] = useState(false);
+  const [showAdd, setShowAdd] = useState(false);
 
   return (
     <aside className="w-[210px] bg-[#080f1a] border-r border-[#132030] flex flex-col flex-shrink-0 h-screen sticky top-0">
@@ -61,6 +67,22 @@ export function Sidebar({ projects }: SidebarProps) {
             );
           })}
         </div>
+
+        {/* Project management buttons */}
+        <div className="px-2 pt-2 pb-1 space-y-1">
+          <button
+            onClick={() => setShowScan(true)}
+            className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] text-[#38bdf8] hover:bg-[#0c1e30] transition-colors border border-dashed border-[#1a3a5c]"
+          >
+            <span className="text-[13px]">⊕</span> Scan for Projects
+          </button>
+          <button
+            onClick={() => setShowAdd(true)}
+            className="w-full flex items-center gap-2 px-2 py-1.5 rounded text-[11px] text-[#4b6a8a] hover:bg-[#0c1e30] hover:text-[#94a3b8] transition-colors border border-dashed border-[#132030]"
+          >
+            <span className="text-[13px]">✎</span> Add Manually
+          </button>
+        </div>
       </div>
 
       {/* Footer */}
@@ -71,6 +93,19 @@ export function Sidebar({ projects }: SidebarProps) {
         </div>
         <span className="text-[11px] text-[#4b6a8a]">mitch</span>
       </div>
+
+      {showScan && (
+        <ScanProjectsModal
+          onClose={() => setShowScan(false)}
+          onAdded={p => { onProjectAdded(p); setShowScan(false); }}
+        />
+      )}
+      {showAdd && (
+        <AddProjectModal
+          onClose={() => setShowAdd(false)}
+          onAdded={p => { onProjectAdded([p]); setShowAdd(false); }}
+        />
+      )}
     </aside>
   );
 }
