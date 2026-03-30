@@ -1,4 +1,4 @@
-app = "foreman-ai-YOUR-NAME"
+app = "foreman-ai"
 primary_region = "ord"
 
 [build]
