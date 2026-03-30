@@ -11,25 +11,33 @@ export interface ExecResult {
  * Runs an executable with args. Never throws — always resolves with exit info.
  * Uses execFile (not exec/spawn with shell:true) to prevent command injection.
  * timeoutMs defaults to 30 minutes.
+ * On Windows, appends .cmd to the file name so npm global scripts resolve correctly.
  */
 export function execFileNoThrow(
   file: string,
   args: string[],
   options: { cwd?: string; timeoutMs?: number } = {}
 ): Promise<ExecResult> {
+  // On Windows, npm global binaries are .cmd wrappers
+  const resolvedFile =
+    process.platform === "win32" && !file.includes(".") ? `${file}.cmd` : file;
+
   return new Promise((resolve) => {
     const { cwd, timeoutMs = 30 * 60 * 1000 } = options;
     let timedOut = false;
 
     const child = execFile(
-      file,
+      resolvedFile,
       args,
-      { cwd, env: process.env, maxBuffer: 10 * 1024 * 1024 },
+      { cwd, env: process.env, maxBuffer: 10 * 1024 * 1024, shell: process.platform === "win32" },
       (error, stdout, stderr) => {
+        const stderrOut = error?.code === "ENOENT"
+          ? `Command not found: ${resolvedFile}. Install the claude CLI via npm install -g @anthropic/claude-code`
+          : stderr;
         resolve({
-          exitCode: error ? (error.code as number ?? 1) : 0,
+          exitCode: error ? 1 : 0,
           stdout,
-          stderr,
+          stderr: stderrOut,
           timedOut,
         });
       }
