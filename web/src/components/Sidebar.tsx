@@ -38,6 +38,7 @@ export function Sidebar({ projects, onProjectAdded }: SidebarProps) {
         </div>
         <SidebarLink to="/" active={location.pathname === "/"} label="Dashboard" icon="⊞" />
         <SidebarLink to="/sessions" active={location.pathname === "/sessions"} label="Sessions" icon="⊙" />
+        <SidebarLink to="/execution" active={location.pathname === "/execution"} label="Execution" icon="▶" />
       </nav>
 
       {/* Projects */}

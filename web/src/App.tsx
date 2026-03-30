@@ -6,6 +6,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { ProjectView } from "./pages/ProjectView";
 import { AddItem } from "./pages/AddItem";
 import { api, type Project } from "./lib/api";
+import { ExecutionPage } from "./pages/ExecutionPage";
 
 export default function App() {
   return (
@@ -55,6 +56,7 @@ function AppInner() {
             <Route path="/" element={<Dashboard onProjectsLoaded={setProjects} />} />
             <Route path="/project/:id" element={<ProjectView />} />
             <Route path="/project/:id/add" element={<AddItem />} />
+            <Route path="/execution" element={<ExecutionPage />} />
           </Routes>
         </main>
       </div>
