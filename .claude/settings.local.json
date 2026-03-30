@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm init:*)",
+      "Bash(npm install:*)",
+      "mcp__mcp-registry__search_mcp_registry",
+      "Bash(npx tsc:*)",
+      "Bash(printf '{\"\"\"\"jsonrpc\"\"\"\":\"\"\"\"2.0\"\"\"\",\"\"\"\"id\"\"\"\":1,\"\"\"\"method\"\"\"\":\"\"\"\"initialize\"\"\"\",\"\"\"\"params\"\"\"\":{\"\"\"\"protocolVersion\"\"\"\":\"\"\"\"2024-11-05\"\"\"\",\"\"\"\"capabilities\"\"\"\":{},\"\"\"\"clientInfo\"\"\"\":{\"\"\"\"name\"\"\"\":\"\"\"\"test\"\"\"\",\"\"\"\"version\"\"\"\":\"\"\"\"1.0\"\"\"\"}}}\\\\n{\"\"\"\"jsonrpc\"\"\"\":\"\"\"\"2.0\"\"\"\",\"\"\"\"id\"\"\"\":2,\"\"\"\"method\"\"\"\":\"\"\"\"tools/list\"\"\"\",\"\"\"\"params\"\"\"\":{}}\\\\n')",
+      "Bash(timeout 5 node dist/index.js --db ./data/test.db)",
+      "Bash(npm whoami:*)",
+      "Bash(npm view:*)",
+      "Bash(npm publish:*)",
+      "Bash(npm config:*)",
+      "Bash(find C:Usersmitchforeman-ai -maxdepth 2 -type f \\\\\\(-name *.md -o -name *.config.* -o -name .mcp* \\\\\\))",
+      "Bash(grep -E '\\\\.\\(md|json|txt\\)$')",
+      "Bash(find /c/Users/mitch/.claude/projects -type f -name *.md)",
+      "Bash(find /c/Users/mitch/paris-bets -type f -name *.md)",
+      "Bash(grep -E \"\\\\.md$|\\\\.json$|^-\")",
+      "Bash(npm run:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(grep -E \"^express$|^cors$\")",
+      "Bash(npm create:*)",
+      "Bash(wait)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(gh repo:*)",
+      "Bash(C:/Users/mitch/.claude/plugins/cache/claude-plugins-official/superpowers/5.0.6/skills/brainstorming/scripts/start-server.sh --project-dir \"C:/Users/mitch/foreman-ai/.claude/worktrees/blissful-chaum\")"
+    ]
+  }
+}

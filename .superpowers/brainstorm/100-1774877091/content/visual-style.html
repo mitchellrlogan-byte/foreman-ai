@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foreman AI — Visual Style</title>
+<script src="/helper.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e2e8f0; min-height: 100vh; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 700; color: #f8fafc; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #94a3b8; margin-bottom: 28px; }
+
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .card { border-radius: 12px; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: border-color 0.2s, transform 0.15s; }
+  .card:hover { transform: translateY(-2px); }
+  .card.selected { border-color: #6366f1 !important; }
+
+  /* Card A – Enterprise Dark */
+  .card-a { background: #1e2433; border-color: #2d3748; }
+  .card-a .app-shell { display: flex; height: 320px; }
+  .card-a .sidebar { width: 52px; background: #111827; display: flex; flex-direction: column; align-items: center; padding: 12px 0; gap: 16px; }
+  .card-a .sidebar-icon { width: 28px; height: 28px; background: #374151; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 11px; }
+  .card-a .sidebar-icon.active { background: #6366f1; }
+  .card-a .left-nav { width: 180px; background: #151c2c; padding: 12px; border-right: 1px solid #1f2937; }
+  .card-a .nav-section { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #4b5563; margin: 12px 0 6px; }
+  .card-a .nav-item { font-size: 11px; color: #9ca3af; padding: 5px 8px; border-radius: 4px; margin: 1px 0; cursor: pointer; }
+  .card-a .nav-item.active { background: #1e3a5f; color: #60a5fa; }
+  .card-a .main { flex: 1; padding: 12px; overflow: hidden; }
+  .card-a .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .card-a .top-bar h3 { font-size: 13px; color: #f1f5f9; font-weight: 600; }
+  .card-a .view-toggle { display: flex; gap: 4px; }
+  .card-a .view-btn { font-size: 9px; padding: 3px 8px; border-radius: 3px; background: #1f2937; color: #9ca3af; border: none; cursor: pointer; }
+  .card-a .view-btn.active { background: #6366f1; color: white; }
+  .card-a .kanban { display: flex; gap: 8px; }
+  .card-a .col { flex: 1; background: #1a2232; border-radius: 6px; padding: 8px; }
+  .card-a .col-hdr { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #6b7280; margin-bottom: 6px; display: flex; justify-content: space-between; }
+  .card-a .item-card { background: #0f172a; border: 1px solid #1e293b; border-radius: 4px; padding: 6px 8px; margin-bottom: 4px; }
+  .card-a .item-title { font-size: 10px; color: #e2e8f0; margin-bottom: 3px; }
+  .card-a .item-meta { display: flex; gap: 4px; }
+  .card-a .badge { font-size: 8px; padding: 1px 5px; border-radius: 3px; }
+  .card-a .badge-feature { background: #1e3a5f; color: #60a5fa; }
+  .card-a .badge-bug { background: #3b1a1a; color: #f87171; }
+  .card-a .badge-roi { background: #1a3020; color: #4ade80; }
+  .card-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: #94a3b8; margin-top: 10px; padding: 0 4px 6px; }
+  .card-desc { font-size: 12px; color: #64748b; padding: 0 4px 12px; line-height: 1.4; }
+
+  /* Card B – Light Professional */
+  .card-b { background: #ffffff; border-color: #e2e8f0; }
+  .card-b .app-shell { display: flex; height: 320px; font-family: -apple-system, sans-serif; }
+  .card-b .sidebar { width: 200px; background: #f8fafc; border-right: 1px solid #e2e8f0; padding: 0; }
+  .card-b .sidebar-logo { height: 44px; padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-size: 13px; font-weight: 700; color: #1e40af; display: flex; align-items: center; gap: 6px; }
+  .card-b .logo-dot { width: 8px; height: 8px; border-radius: 50%; background: #3b82f6; }
+  .card-b .sidebar-section { padding: 8px 8px 2px; font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #94a3b8; }
+  .card-b .nav-item { display: flex; align-items: center; gap: 8px; padding: 6px 12px; font-size: 12px; color: #374151; cursor: pointer; margin: 1px 0; border-radius: 4px; }
+  .card-b .nav-item.active { background: #dbeafe; color: #1d4ed8; font-weight: 600; }
+  .card-b .nav-item .dot { width: 8px; height: 8px; border-radius: 2px; }
+  .card-b .main { flex: 1; background: #f8fafc; display: flex; flex-direction: column; }
+  .card-b .topbar { height: 44px; background: white; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; padding: 0 16px; justify-content: space-between; }
+  .card-b .breadcrumb { font-size: 12px; color: #6b7280; }
+  .card-b .breadcrumb span { color: #111827; font-weight: 600; }
+  .card-b .top-actions { display: flex; gap: 6px; }
+  .card-b .btn { font-size: 10px; padding: 4px 10px; border-radius: 4px; border: 1px solid #e2e8f0; background: white; color: #374151; cursor: pointer; }
+  .card-b .btn-primary { background: #2563eb; color: white; border-color: #2563eb; }
+  .card-b .content { flex: 1; padding: 12px; overflow: hidden; }
+  .card-b .table { width: 100%; border-collapse: collapse; }
+  .card-b .table th { font-size: 9px; text-transform: uppercase; letter-spacing: 0.5px; color: #9ca3af; padding: 4px 8px; border-bottom: 1px solid #e2e8f0; text-align: left; }
+  .card-b .table td { font-size: 11px; color: #374151; padding: 6px 8px; border-bottom: 1px solid #f1f5f9; }
+  .card-b .status-chip { font-size: 9px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+  .card-b .status-ip { background: #fef3c7; color: #d97706; }
+  .card-b .status-ready { background: #d1fae5; color: #059669; }
+  .card-b .status-bl { background: #f1f5f9; color: #6b7280; }
+  .card-b .pri { font-size: 10px; font-weight: 700; color: #ef4444; }
+  .card-b .roi { font-size: 10px; color: #7c3aed; font-weight: 600; }
+
+  /* Card C – Midnight Blue/Teal */
+  .card-c { background: #0d1b2a; border-color: #1e3a5f; }
+  .card-c .app-shell { display: flex; height: 320px; }
+  .card-c .sidebar { width: 180px; background: #0a1628; border-right: 1px solid #1a3a5c; padding: 0; }
+  .card-c .sidebar-logo { height: 44px; display: flex; align-items: center; padding: 0 14px; border-bottom: 1px solid #1a3a5c; font-size: 13px; font-weight: 700; color: #e0f2fe; gap: 6px; }
+  .card-c .logo-mark { width: 20px; height: 20px; background: linear-gradient(135deg, #0ea5e9, #14b8a6); border-radius: 5px; }
+  .card-c .project-list { padding: 8px; }
+  .card-c .proj-item { padding: 6px 8px; border-radius: 5px; margin: 2px 0; cursor: pointer; }
+  .card-c .proj-item.active { background: #0c2d4a; }
+  .card-c .proj-name { font-size: 11px; color: #bfdbfe; font-weight: 500; }
+  .card-c .proj-count { font-size: 9px; color: #4b6a8a; }
+  .card-c .main { flex: 1; padding: 12px; }
+  .card-c .dash-header { margin-bottom: 10px; }
+  .card-c .dash-title { font-size: 13px; font-weight: 700; color: #e0f2fe; }
+  .card-c .dash-sub { font-size: 10px; color: #4b6a8a; }
+  .card-c .stats-row { display: flex; gap: 6px; margin-bottom: 10px; }
+  .card-c .stat { flex: 1; background: #0c1e30; border: 1px solid #1a3a5c; border-radius: 6px; padding: 6px 8px; }
+  .card-c .stat-num { font-size: 18px; font-weight: 700; color: #0ea5e9; line-height: 1; }
+  .card-c .stat-label { font-size: 9px; color: #4b6a8a; margin-top: 2px; }
+  .card-c .section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: #0ea5e9; margin-bottom: 6px; }
+  .card-c .item-row { display: flex; align-items: center; gap: 6px; padding: 5px 7px; background: #0c1e30; border-radius: 4px; margin-bottom: 3px; }
+  .card-c .item-dot { width: 6px; height: 6px; border-radius: 50%; background: #0ea5e9; flex-shrink: 0; }
+  .card-c .item-name { font-size: 10px; color: #bfdbfe; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-c .item-tag { font-size: 8px; padding: 1px 5px; border-radius: 3px; background: #0c2d4a; color: #38bdf8; }
+  .card-c .item-roi { font-size: 9px; color: #14b8a6; font-weight: 600; }
+
+  .selection-hint { text-align: center; margin-top: 24px; font-size: 12px; color: #64748b; }
+</style>
+</head>
+<body>
+  <h1>Which visual style fits Foreman AI?</h1>
+  <p class="subtitle">All three use the same layout (Jira-style board + MS Project table toggle). Click to select your preferred direction.</p>
+
+  <div class="cards">
+
+    <!-- Option A: Enterprise Dark -->
+    <div class="card card-a" data-choice="a" onclick="toggleSelect(this)">
+      <div class="app-shell">
+        <div class="sidebar">
+          <div class="sidebar-icon active" style="font-size:14px;">⊞</div>
+          <div class="sidebar-icon" style="font-size:14px;">◈</div>
+          <div class="sidebar-icon" style="font-size:14px;">⊡</div>
+          <div class="sidebar-icon" style="font-size:14px;">⚙</div>
+        </div>
+        <div class="left-nav">
+          <div style="padding: 10px 8px; font-size: 12px; font-weight: 700; color: #a5b4fc;">⬡ Foreman</div>
+          <div class="nav-section">Projects</div>
+          <div class="nav-item active">foreman-ai</div>
+          <div class="nav-item">paris-bets</div>
+          <div class="nav-item">haussmann</div>
+          <div class="nav-section">Views</div>
+          <div class="nav-item">Board</div>
+          <div class="nav-item">Backlog</div>
+          <div class="nav-item">Sessions</div>
+        </div>
+        <div class="main">
+          <div class="top-bar">
+            <h3>foreman-ai</h3>
+            <div class="view-toggle">
+              <button class="view-btn active">Board</button>
+              <button class="view-btn">Table</button>
+              <button class="view-btn">+ Add</button>
+            </div>
+          </div>
+          <div class="kanban">
+            <div class="col">
+              <div class="col-hdr"><span>Backlog</span><span>4</span></div>
+              <div class="item-card"><div class="item-title">Edit item UI</div><div class="item-meta"><span class="badge badge-feature">feature</span><span class="badge badge-roi">ROI 8</span></div></div>
+              <div class="item-card"><div class="item-title">Search support</div><div class="item-meta"><span class="badge badge-feature">feature</span></div></div>
+            </div>
+            <div class="col">
+              <div class="col-hdr"><span>Ready</span><span>2</span></div>
+              <div class="item-card"><div class="item-title">Item detail drawer</div><div class="item-meta"><span class="badge badge-feature">feature</span><span class="badge badge-roi">ROI 9</span></div></div>
+            </div>
+            <div class="col">
+              <div class="col-hdr"><span>In Progress</span><span>1</span></div>
+              <div class="item-card" style="border-left: 2px solid #6366f1;"><div class="item-title">Redesign dashboard</div><div class="item-meta"><span class="badge badge-roi">ROI 10</span></div></div>
+            </div>
+            <div class="col">
+              <div class="col-hdr"><span>Done</span><span>3</span></div>
+              <div class="item-card" style="opacity:0.5;"><div class="item-title">MCP server v2</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card-label">A — Enterprise Dark</div>
+      <div class="card-desc">Dark navy + indigo. Feels like a serious dev tool. High contrast, low eye strain for long sessions.</div>
+    </div>
+
+    <!-- Option B: Light Professional -->
+    <div class="card card-b" data-choice="b" onclick="toggleSelect(this)">
+      <div class="app-shell">
+        <div class="sidebar">
+          <div class="sidebar-logo"><div class="logo-dot"></div>Foreman</div>
+          <div class="sidebar-section">Projects</div>
+          <div class="nav-item active"><div class="dot" style="background:#3b82f6;"></div>foreman-ai</div>
+          <div class="nav-item"><div class="dot" style="background:#8b5cf6;"></div>paris-bets</div>
+          <div class="nav-item"><div class="dot" style="background:#10b981;"></div>haussmann</div>
+          <div class="sidebar-section" style="margin-top:8px;">Views</div>
+          <div class="nav-item">📋 Board</div>
+          <div class="nav-item">📊 Backlog</div>
+          <div class="nav-item">🕐 Sessions</div>
+        </div>
+        <div class="main">
+          <div class="topbar">
+            <div class="breadcrumb">Projects / <span>foreman-ai</span></div>
+            <div class="top-actions">
+              <button class="btn">Board</button>
+              <button class="btn" style="background:#f1f5f9;">Table</button>
+              <button class="btn btn-primary">+ Add Item</button>
+            </div>
+          </div>
+          <div class="content">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Status</th>
+                  <th>Pri</th>
+                  <th>ROI</th>
+                  <th>Effort</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>Redesign dashboard UI</td><td><span class="status-chip status-ip">In Progress</span></td><td class="pri">1</td><td class="roi">10</td><td style="font-size:10px;color:#9ca3af;">M</td></tr>
+                <tr><td>Item detail drawer</td><td><span class="status-chip status-ready">Ready</span></td><td class="pri">2</td><td class="roi">9</td><td style="font-size:10px;color:#9ca3af;">S</td></tr>
+                <tr><td>Edit item UI</td><td><span class="status-chip status-bl">Backlog</span></td><td style="font-size:10px;color:#6b7280;">3</td><td class="roi">8</td><td style="font-size:10px;color:#9ca3af;">S</td></tr>
+                <tr><td>Session analytics</td><td><span class="status-chip status-bl">Backlog</span></td><td style="font-size:10px;color:#6b7280;">4</td><td class="roi">7</td><td style="font-size:10px;color:#9ca3af;">M</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="card-label" style="color:#374151;">B — Light Professional</div>
+      <div class="card-desc" style="color:#6b7280;">Clean white + blue. Familiar, accessible, closest to Jira/Linear. Easy to scan lots of data.</div>
+    </div>
+
+    <!-- Option C: Midnight Blue/Teal -->
+    <div class="card card-c" data-choice="c" onclick="toggleSelect(this)">
+      <div class="app-shell">
+        <div class="sidebar">
+          <div class="sidebar-logo"><div class="logo-mark"></div>Foreman</div>
+          <div class="project-list">
+            <div style="font-size:9px;color:#4b6a8a;text-transform:uppercase;letter-spacing:1px;padding:4px 8px 2px;">Projects</div>
+            <div class="proj-item active">
+              <div class="proj-name">foreman-ai</div>
+              <div class="proj-count">12 items · 1 in progress</div>
+            </div>
+            <div class="proj-item">
+              <div class="proj-name">paris-bets</div>
+              <div class="proj-count">8 items</div>
+            </div>
+            <div class="proj-item">
+              <div class="proj-name">haussmann</div>
+              <div class="proj-count">5 items</div>
+            </div>
+          </div>
+        </div>
+        <div class="main">
+          <div class="dash-header">
+            <div class="dash-title">foreman-ai</div>
+            <div class="dash-sub">Last session 2h ago · 3 items touched</div>
+          </div>
+          <div class="stats-row">
+            <div class="stat"><div class="stat-num">12</div><div class="stat-label">Total</div></div>
+            <div class="stat"><div class="stat-num" style="color:#f59e0b;">4</div><div class="stat-label">Ready</div></div>
+            <div class="stat"><div class="stat-num" style="color:#0ea5e9;">1</div><div class="stat-label">Active</div></div>
+            <div class="stat"><div class="stat-num" style="color:#10b981;">7</div><div class="stat-label">Done</div></div>
+          </div>
+          <div class="section-title">⚡ Next Work (pm_next_work)</div>
+          <div class="item-row"><div class="item-dot" style="background:#f59e0b;"></div><div class="item-name">Item detail drawer</div><div class="item-tag">feature</div><div class="item-roi">ROI 9</div></div>
+          <div class="item-row"><div class="item-dot"></div><div class="item-name">Edit item UI</div><div class="item-tag">feature</div><div class="item-roi">ROI 8</div></div>
+          <div class="item-row"><div class="item-dot" style="background:#64748b;"></div><div class="item-name">Session analytics</div><div class="item-tag">chore</div><div class="item-roi">ROI 7</div></div>
+        </div>
+      </div>
+      <div class="card-label" style="color:#94a3b8;">C — Midnight + Teal</div>
+      <div class="card-desc" style="color:#64748b;">Deep blue + cyan accent. AI-native feel. Highlights pm_next_work as the hero feature prominently.</div>
+    </div>
+
+  </div>
+
+  <p class="selection-hint">Click a card to select · You can also just tell me in the terminal</p>
+</body>
+</html>

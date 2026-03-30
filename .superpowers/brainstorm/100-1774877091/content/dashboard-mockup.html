@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foreman AI — Dashboard Mockup</title>
+<script src="/helper.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0a0e17; color: #e2e8f0; padding: 20px; }
+
+  h1 { font-size: 18px; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #4b6a8a; margin-bottom: 20px; }
+
+  .tabs { display: flex; gap: 4px; margin-bottom: 16px; }
+  .tab { padding: 7px 16px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; border: 1px solid transparent; color: #4b6a8a; transition: all 0.15s; }
+  .tab:hover { color: #94a3b8; }
+  .tab.active { background: #0c2d4a; border-color: #1a5276; color: #38bdf8; }
+
+  /* App Shell */
+  .app-shell { display: flex; height: 620px; background: #0d1b2a; border-radius: 12px; overflow: hidden; border: 1px solid #1a3a5c; box-shadow: 0 25px 60px rgba(0,0,0,0.6); }
+
+  /* Sidebar */
+  .sidebar { width: 210px; background: #080f1a; border-right: 1px solid #132030; display: flex; flex-direction: column; flex-shrink: 0; }
+  .logo { height: 52px; display: flex; align-items: center; padding: 0 16px; gap: 10px; border-bottom: 1px solid #132030; }
+  .logo-mark { width: 26px; height: 26px; background: linear-gradient(135deg, #0ea5e9, #14b8a6); border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+  .logo-text { font-size: 14px; font-weight: 700; color: #e0f2fe; letter-spacing: -0.3px; }
+  .logo-badge { font-size: 9px; background: #0c2d4a; color: #38bdf8; padding: 1px 5px; border-radius: 3px; margin-left: auto; }
+
+  .nav-section-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #1e4060; padding: 14px 16px 4px; }
+  .nav-item { display: flex; align-items: center; gap: 9px; padding: 7px 14px; font-size: 12px; color: #4b6a8a; cursor: pointer; border-radius: 0; border-left: 2px solid transparent; transition: all 0.15s; }
+  .nav-item:hover { background: #0c1e30; color: #94a3b8; }
+  .nav-item.active { background: #0c1e30; color: #38bdf8; border-left-color: #0ea5e9; }
+  .nav-icon { width: 16px; text-align: center; font-size: 13px; }
+  .nav-badge { margin-left: auto; font-size: 9px; background: #0c2d4a; color: #38bdf8; padding: 1px 6px; border-radius: 8px; }
+  .nav-badge.orange { background: #2d1a06; color: #f59e0b; }
+
+  .project-list { padding: 4px 8px; }
+  .proj-item { display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 5px; cursor: pointer; margin: 1px 0; }
+  .proj-item:hover { background: #0c1e30; }
+  .proj-item.active { background: #0c2438; }
+  .proj-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .proj-name { font-size: 11px; color: #7aa3c8; font-weight: 500; flex: 1; }
+  .proj-item.active .proj-name { color: #bfdbfe; }
+  .proj-count { font-size: 9px; color: #1e4060; }
+
+  .sidebar-footer { margin-top: auto; border-top: 1px solid #132030; padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
+  .avatar { width: 24px; height: 24px; background: linear-gradient(135deg, #0ea5e9, #7c3aed); border-radius: 50%; font-size: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; }
+  .user-name { font-size: 11px; color: #4b6a8a; }
+
+  /* Main */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .topbar { height: 52px; border-bottom: 1px solid #132030; display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
+  .page-title { font-size: 14px; font-weight: 700; color: #e0f2fe; flex: 1; }
+  .view-switcher { display: flex; background: #0a1628; border: 1px solid #1a3a5c; border-radius: 6px; overflow: hidden; }
+  .view-btn { padding: 5px 12px; font-size: 11px; color: #4b6a8a; cursor: pointer; border: none; background: transparent; transition: all 0.15s; }
+  .view-btn.active { background: #0c2d4a; color: #38bdf8; }
+  .add-btn { background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border: none; border-radius: 6px; padding: 6px 14px; font-size: 11px; font-weight: 600; cursor: pointer; }
+  .filter-btn { background: transparent; border: 1px solid #1a3a5c; color: #4b6a8a; border-radius: 6px; padding: 5px 10px; font-size: 11px; cursor: pointer; }
+
+  .content { flex: 1; overflow: auto; padding: 16px 20px; }
+
+  /* Dashboard view */
+  .dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 20px; }
+  .stat-card { background: #0c1e30; border: 1px solid #1a3a5c; border-radius: 8px; padding: 12px 14px; }
+  .stat-number { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
+  .stat-label { font-size: 10px; color: #4b6a8a; text-transform: uppercase; letter-spacing: 0.5px; }
+
+  .section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+  .section-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: #0ea5e9; }
+  .section-count { font-size: 10px; background: #0c2d4a; color: #38bdf8; padding: 1px 7px; border-radius: 8px; }
+
+  .next-work-list { margin-bottom: 20px; }
+  .nw-item { display: flex; align-items: center; gap: 10px; padding: 9px 12px; background: #0c1e30; border: 1px solid #132030; border-radius: 6px; margin-bottom: 4px; cursor: pointer; transition: border-color 0.15s; }
+  .nw-item:hover { border-color: #1a5276; }
+  .nw-rank { width: 20px; height: 20px; background: #0a1628; border: 1px solid #1a3a5c; border-radius: 4px; font-size: 9px; color: #38bdf8; display: flex; align-items: center; justify-content: center; font-weight: 700; flex-shrink: 0; }
+  .nw-title { font-size: 12px; color: #bfdbfe; flex: 1; }
+  .nw-tags { display: flex; gap: 5px; }
+  .tag { font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+  .tag-feature { background: #0c2438; color: #38bdf8; }
+  .tag-bug { background: #2d0f0f; color: #f87171; }
+  .tag-chore { background: #1a1a2e; color: #818cf8; }
+  .tag-research { background: #0f2a1a; color: #34d399; }
+  .tag-roi { background: #0f1e10; color: #10b981; }
+  .tag-effort { background: #1e1a0a; color: #fbbf24; }
+  .nw-status { font-size: 9px; padding: 2px 7px; border-radius: 10px; font-weight: 600; }
+  .status-ready { background: #0f2a1a; color: #34d399; }
+  .status-backlog { background: #132030; color: #4b6a8a; }
+  .status-ip { background: #1e2d0a; color: #a3e635; }
+
+  /* In-progress section */
+  .ip-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 20px; }
+  .ip-card { background: #0c1e30; border: 1px solid #1a3a5c; border-radius: 8px; padding: 12px; border-left: 3px solid #0ea5e9; cursor: pointer; transition: all 0.15s; }
+  .ip-card:hover { border-color: #0ea5e9; background: #0e2440; }
+  .ip-card-title { font-size: 12px; color: #e0f2fe; font-weight: 600; margin-bottom: 4px; }
+  .ip-card-meta { font-size: 10px; color: #4b6a8a; display: flex; gap: 8px; }
+
+  /* Projects grid */
+  .projects-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .project-card { background: #0c1e30; border: 1px solid #132030; border-radius: 8px; padding: 12px; cursor: pointer; transition: border-color 0.15s; }
+  .project-card:hover { border-color: #1a5276; }
+  .project-card-name { font-size: 12px; font-weight: 600; color: #bfdbfe; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .project-card-stats { font-size: 10px; color: #4b6a8a; }
+  .project-bar { height: 3px; background: #0a1628; border-radius: 2px; margin-top: 8px; overflow: hidden; }
+  .project-bar-fill { height: 100%; background: linear-gradient(90deg, #0ea5e9, #14b8a6); border-radius: 2px; }
+
+  /* Kanban board */
+  .kanban { display: flex; gap: 10px; height: 100%; }
+  .k-col { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  .k-col-header { display: flex; align-items: center; justify-content: space-between; padding: 0 2px 10px; }
+  .k-col-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
+  .k-col-count { font-size: 10px; background: #0a1628; color: #4b6a8a; padding: 1px 6px; border-radius: 8px; }
+  .k-backlog .k-col-title { color: #4b6a8a; }
+  .k-ready .k-col-title { color: #34d399; }
+  .k-ip .k-col-title { color: #38bdf8; }
+  .k-done .k-col-title { color: #4b6a8a; }
+  .k-card { background: #0c1e30; border: 1px solid #132030; border-radius: 6px; padding: 9px 10px; margin-bottom: 6px; cursor: pointer; transition: border-color 0.15s; }
+  .k-card:hover { border-color: #1a5276; }
+  .k-ip .k-card { border-left: 2px solid #0ea5e9; }
+  .k-ready .k-card { border-left: 2px solid #34d399; }
+  .k-card-title { font-size: 11px; color: #bfdbfe; margin-bottom: 6px; line-height: 1.3; }
+  .k-card-footer { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
+  .k-card.done { opacity: 0.45; }
+
+  /* Table view */
+  .table-view { width: 100%; }
+  .table-header { display: grid; grid-template-columns: 2fr 90px 50px 50px 70px 80px; gap: 8px; padding: 6px 10px; font-size: 9px; text-transform: uppercase; letter-spacing: 0.8px; color: #1e4060; border-bottom: 1px solid #132030; }
+  .table-row { display: grid; grid-template-columns: 2fr 90px 50px 50px 70px 80px; gap: 8px; padding: 8px 10px; border-bottom: 1px solid #0d1a26; align-items: center; cursor: pointer; transition: background 0.1s; }
+  .table-row:hover { background: #0c1e30; }
+  .table-title { font-size: 12px; color: #bfdbfe; }
+  .table-status { }
+  .table-pri { font-size: 12px; font-weight: 700; color: #0ea5e9; }
+  .table-roi { font-size: 11px; color: #10b981; font-weight: 600; }
+  .table-effort { font-size: 10px; color: #4b6a8a; }
+  .table-actions { display: flex; gap: 4px; }
+  .action-btn { font-size: 9px; padding: 2px 7px; border-radius: 4px; background: #0a1628; color: #4b6a8a; border: 1px solid #132030; cursor: pointer; }
+  .action-btn:hover { color: #38bdf8; border-color: #1a5276; }
+
+  .panel-note { text-align: center; color: #1e4060; font-size: 11px; padding: 16px; }
+</style>
+</head>
+<body>
+  <h1>Foreman AI — Full App Mockup</h1>
+  <p class="subtitle">Switch between views below. Click anything to get a feel for interactions.</p>
+
+  <div class="tabs">
+    <div class="tab active" onclick="showView('dashboard')">Dashboard</div>
+    <div class="tab" onclick="showView('board')">Project Board</div>
+    <div class="tab" onclick="showView('table')">Project Table</div>
+  </div>
+
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="logo">
+        <div class="logo-mark">⬡</div>
+        <div class="logo-text">Foreman</div>
+        <div class="logo-badge">v2</div>
+      </div>
+
+      <div id="nav-dashboard">
+        <div class="nav-section-label">Navigation</div>
+        <div class="nav-item active" onclick="showView('dashboard')">
+          <span class="nav-icon">⊞</span> Dashboard
+        </div>
+        <div class="nav-item" onclick="showView('board')">
+          <span class="nav-icon">⊟</span> All Projects
+        </div>
+        <div class="nav-item">
+          <span class="nav-icon">⊙</span> Sessions
+          <span class="nav-badge">3</span>
+        </div>
+
+        <div class="nav-section-label">Projects</div>
+        <div class="project-list">
+          <div class="proj-item active">
+            <div class="proj-dot" style="background:#0ea5e9;"></div>
+            <div class="proj-name">foreman-ai</div>
+            <div class="proj-count">12</div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-dot" style="background:#8b5cf6;"></div>
+            <div class="proj-name">paris-bets</div>
+            <div class="proj-count">8</div>
+          </div>
+          <div class="proj-item">
+            <div class="proj-dot" style="background:#10b981;"></div>
+            <div class="proj-name">haussmann</div>
+            <div class="proj-count">5</div>
+          </div>
+          <div class="proj-item" style="opacity:0.5;">
+            <div class="proj-dot" style="background:#374151;border:1px dashed #374151;background:transparent;"></div>
+            <div class="proj-name" style="color:#1e4060;">+ Add project</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-footer">
+        <div class="avatar">M</div>
+        <div class="user-name">mitch</div>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="main">
+      <div class="topbar">
+        <div class="page-title" id="page-title">Dashboard</div>
+        <button class="filter-btn">Filter ▾</button>
+        <div class="view-switcher" id="view-switcher" style="display:none;">
+          <div class="view-btn active" onclick="setViewMode('board')">Board</div>
+          <div class="view-btn" onclick="setViewMode('table')">Table</div>
+        </div>
+        <button class="add-btn" onclick="showView('board')">+ Add Item</button>
+      </div>
+
+      <div class="content">
+
+        <!-- DASHBOARD VIEW -->
+        <div id="view-dashboard">
+          <div class="dash-stats">
+            <div class="stat-card">
+              <div class="stat-number" style="color:#e0f2fe;">25</div>
+              <div class="stat-label">Total Items</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" style="color:#f59e0b;">7</div>
+              <div class="stat-label">Ready to Start</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" style="color:#0ea5e9;">3</div>
+              <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" style="color:#10b981;">15</div>
+              <div class="stat-label">Completed</div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <div class="section-title">⚡ Next Work</div>
+            <div class="section-count">pm_next_work</div>
+          </div>
+          <div class="next-work-list">
+            <div class="nw-item">
+              <div class="nw-rank">#1</div>
+              <div class="nw-title">Item detail drawer / slide-over panel</div>
+              <div class="nw-tags">
+                <span class="tag tag-feature">feature</span>
+                <span class="tag tag-roi">ROI 9</span>
+                <span class="tag tag-effort">Small</span>
+              </div>
+              <span class="nw-status status-ready">Ready</span>
+            </div>
+            <div class="nw-item">
+              <div class="nw-rank">#2</div>
+              <div class="nw-title">Edit &amp; delete items from dashboard</div>
+              <div class="nw-tags">
+                <span class="tag tag-feature">feature</span>
+                <span class="tag tag-roi">ROI 8</span>
+                <span class="tag tag-effort">Small</span>
+              </div>
+              <span class="nw-status status-ready">Ready</span>
+            </div>
+            <div class="nw-item">
+              <div class="nw-rank">#3</div>
+              <div class="nw-title">Session analytics page</div>
+              <div class="nw-tags">
+                <span class="tag tag-chore">chore</span>
+                <span class="tag tag-roi">ROI 7</span>
+                <span class="tag tag-effort">Medium</span>
+              </div>
+              <span class="nw-status status-backlog">Backlog</span>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <div class="section-title">🔵 In Progress</div>
+            <div class="section-count">3</div>
+          </div>
+          <div class="ip-cards">
+            <div class="ip-card">
+              <div class="ip-card-title">Redesign dashboard UI</div>
+              <div class="ip-card-meta"><span>foreman-ai</span> · <span>feature</span> · <span style="color:#0ea5e9;">ROI 10</span></div>
+            </div>
+            <div class="ip-card" style="border-left-color:#8b5cf6;">
+              <div class="ip-card-title">Betting model calibration</div>
+              <div class="ip-card-meta"><span>paris-bets</span> · <span>research</span> · <span style="color:#0ea5e9;">ROI 8</span></div>
+            </div>
+          </div>
+
+          <div class="section-header">
+            <div class="section-title">📁 All Projects</div>
+          </div>
+          <div class="projects-grid">
+            <div class="project-card" onclick="showView('board')">
+              <div class="project-card-name"><span style="width:8px;height:8px;background:#0ea5e9;border-radius:2px;display:inline-block;"></span>foreman-ai</div>
+              <div class="project-card-stats">12 items · 1 in progress · 7 done</div>
+              <div class="project-bar"><div class="project-bar-fill" style="width:58%;"></div></div>
+            </div>
+            <div class="project-card">
+              <div class="project-card-name"><span style="width:8px;height:8px;background:#8b5cf6;border-radius:2px;display:inline-block;"></span>paris-bets</div>
+              <div class="project-card-stats">8 items · 2 in progress · 3 done</div>
+              <div class="project-bar"><div class="project-bar-fill" style="width:37%;background:linear-gradient(90deg,#8b5cf6,#6366f1);"></div></div>
+            </div>
+            <div class="project-card">
+              <div class="project-card-name"><span style="width:8px;height:8px;background:#10b981;border-radius:2px;display:inline-block;"></span>haussmann</div>
+              <div class="project-card-stats">5 items · 0 in progress · 5 done</div>
+              <div class="project-bar"><div class="project-bar-fill" style="width:100%;background:linear-gradient(90deg,#10b981,#14b8a6);"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOARD VIEW -->
+        <div id="view-board" style="display:none; height:100%;">
+          <div class="kanban">
+            <div class="k-col k-backlog">
+              <div class="k-col-header">
+                <span class="k-col-title">Backlog</span>
+                <span class="k-col-count">4</span>
+              </div>
+              <div class="k-card">
+                <div class="k-card-title">Search &amp; filter items</div>
+                <div class="k-card-footer"><span class="tag tag-feature">feature</span><span class="tag tag-roi">ROI 7</span><span class="tag tag-effort">M</span></div>
+              </div>
+              <div class="k-card">
+                <div class="k-card-title">Session analytics visualization</div>
+                <div class="k-card-footer"><span class="tag tag-chore">chore</span><span class="tag tag-roi">ROI 7</span></div>
+              </div>
+              <div class="k-card">
+                <div class="k-card-title">Dependency graph UI</div>
+                <div class="k-card-footer"><span class="tag tag-feature">feature</span><span class="tag tag-roi">ROI 6</span><span class="tag tag-effort">L</span></div>
+              </div>
+              <div class="k-card">
+                <div class="k-card-title">Export to CSV/JSON</div>
+                <div class="k-card-footer"><span class="tag tag-chore">chore</span><span class="tag tag-roi">ROI 5</span></div>
+              </div>
+            </div>
+            <div class="k-col k-ready">
+              <div class="k-col-header">
+                <span class="k-col-title">Ready</span>
+                <span class="k-col-count">2</span>
+              </div>
+              <div class="k-card">
+                <div class="k-card-title">Item detail drawer / slide-over</div>
+                <div class="k-card-footer"><span class="tag tag-feature">feature</span><span class="tag tag-roi">ROI 9</span><span class="tag tag-effort">S</span></div>
+              </div>
+              <div class="k-card">
+                <div class="k-card-title">Edit &amp; delete item from UI</div>
+                <div class="k-card-footer"><span class="tag tag-feature">feature</span><span class="tag tag-roi">ROI 8</span><span class="tag tag-effort">S</span></div>
+              </div>
+            </div>
+            <div class="k-col k-ip">
+              <div class="k-col-header">
+                <span class="k-col-title">In Progress</span>
+                <span class="k-col-count">1</span>
+              </div>
+              <div class="k-card">
+                <div class="k-card-title">Redesign dashboard &amp; project UI</div>
+                <div class="k-card-footer"><span class="tag tag-feature">feature</span><span class="tag tag-roi">ROI 10</span><span class="tag tag-effort">M</span></div>
+              </div>
+            </div>
+            <div class="k-col k-done">
+              <div class="k-col-header">
+                <span class="k-col-title">Done</span>
+                <span class="k-col-count">7</span>
+              </div>
+              <div class="k-card done"><div class="k-card-title">MCP server v2 launch</div></div>
+              <div class="k-card done"><div class="k-card-title">Web dashboard scaffold</div></div>
+              <div class="k-card done"><div class="k-card-title">Session tracking tools</div></div>
+              <div class="k-card done"><div class="k-card-title">pm_next_work algorithm</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABLE VIEW -->
+        <div id="view-table" style="display:none;">
+          <div class="table-view">
+            <div class="table-header">
+              <span>Title</span>
+              <span>Status</span>
+              <span>Pri</span>
+              <span>ROI</span>
+              <span>Effort</span>
+              <span>Actions</span>
+            </div>
+            <div class="table-row">
+              <span class="table-title">Redesign dashboard &amp; project UI</span>
+              <span><span class="nw-status status-ip">In Progress</span></span>
+              <span class="table-pri">#1</span>
+              <span class="table-roi">10</span>
+              <span class="table-effort">Medium</span>
+              <span class="table-actions"><button class="action-btn">Edit</button><button class="action-btn">…</button></span>
+            </div>
+            <div class="table-row">
+              <span class="table-title">Item detail drawer / slide-over</span>
+              <span><span class="nw-status status-ready">Ready</span></span>
+              <span class="table-pri">#2</span>
+              <span class="table-roi">9</span>
+              <span class="table-effort">Small</span>
+              <span class="table-actions"><button class="action-btn">Edit</button><button class="action-btn">…</button></span>
+            </div>
+            <div class="table-row">
+              <span class="table-title">Edit &amp; delete item from UI</span>
+              <span><span class="nw-status status-ready">Ready</span></span>
+              <span class="table-pri">#3</span>
+              <span class="table-roi">8</span>
+              <span class="table-effort">Small</span>
+              <span class="table-actions"><button class="action-btn">Edit</button><button class="action-btn">…</button></span>
+            </div>
+            <div class="table-row">
+              <span class="table-title">Search &amp; filter items</span>
+              <span><span class="nw-status status-backlog">Backlog</span></span>
+              <span class="table-pri">#4</span>
+              <span class="table-roi">7</span>
+              <span class="table-effort">Medium</span>
+              <span class="table-actions"><button class="action-btn">Edit</button><button class="action-btn">…</button></span>
+            </div>
+            <div class="table-row">
+              <span class="table-title">Session analytics visualization</span>
+              <span><span class="nw-status status-backlog">Backlog</span></span>
+              <span class="table-pri">#5</span>
+              <span class="table-roi">7</span>
+              <span class="table-effort">Medium</span>
+              <span class="table-actions"><button class="action-btn">Edit</button><button class="action-btn">…</button></span>
+            </div>
+            <div class="table-row">
+              <span class="table-title">Dependency graph UI</span>
+              <span><span class="nw-status status-backlog">Backlog</span></span>
+              <span class="table-pri">#6</span>
+              <span class="table-roi">6</span>
+              <span class="table-effort">Large</span>
+              <span class="table-actions"><button class="action-btn">Edit</button><button class="action-btn">…</button></span>
+            </div>
+            <div class="table-row">
+              <span class="table-title">Export to CSV/JSON</span>
+              <span><span class="nw-status status-backlog">Backlog</span></span>
+              <span class="table-pri">#7</span>
+              <span class="table-roi">5</span>
+              <span class="table-effort">Small</span>
+              <span class="table-actions"><button class="action-btn">Edit</button><button class="action-btn">…</button></span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+<script>
+function showView(view) {
+  document.getElementById('view-dashboard').style.display = 'none';
+  document.getElementById('view-board').style.display = 'none';
+  document.getElementById('view-table').style.display = 'none';
+
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+
+  const switcher = document.getElementById('view-switcher');
+
+  if (view === 'dashboard') {
+    document.getElementById('view-dashboard').style.display = '';
+    document.getElementById('page-title').textContent = 'Dashboard';
+    document.querySelectorAll('.tab')[0].classList.add('active');
+    switcher.style.display = 'none';
+  } else if (view === 'board') {
+    document.getElementById('view-board').style.display = '';
+    document.getElementById('page-title').textContent = 'foreman-ai';
+    document.querySelectorAll('.tab')[1].classList.add('active');
+    switcher.style.display = '';
+    document.querySelectorAll('.view-btn')[0].classList.add('active');
+    document.querySelectorAll('.view-btn')[1].classList.remove('active');
+  } else if (view === 'table') {
+    document.getElementById('view-table').style.display = '';
+    document.getElementById('page-title').textContent = 'foreman-ai';
+    document.querySelectorAll('.tab')[2].classList.add('active');
+    switcher.style.display = '';
+    document.querySelectorAll('.view-btn')[1].classList.add('active');
+    document.querySelectorAll('.view-btn')[0].classList.remove('active');
+  }
+}
+
+function setViewMode(mode) {
+  if (mode === 'board') showView('board');
+  else showView('table');
+}
+</script>
+</body>
+</html>
