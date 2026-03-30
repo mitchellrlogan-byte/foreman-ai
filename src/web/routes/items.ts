@@ -161,3 +161,48 @@ itemsRouter.delete("/:id", (req, res) => {
 
   res.json({ deleted: true });
 });
+
+export const nextWorkRouter = Router();
+
+nextWorkRouter.get("/", (req, res) => {
+  const db = getDb();
+  const projectId = req.query.project_id as string | undefined;
+  const limit = Math.min(parseInt(req.query.limit as string) || 5, 20);
+
+  const conditions = ["i.status NOT IN ('done', 'archived')"];
+  const params: unknown[] = [];
+
+  if (projectId) {
+    conditions.push("i.project_id = ?");
+    params.push(projectId);
+  }
+
+  const where = `WHERE ${conditions.join(" AND ")}`;
+
+  const rows = db.prepare(`
+    SELECT * FROM items i
+    ${where}
+    ORDER BY
+      CASE i.status WHEN 'in_progress' THEN 0 WHEN 'ready' THEN 1 ELSE 2 END,
+      i.priority ASC,
+      COALESCE(i.roi_score, 0) DESC
+    LIMIT ?
+  `).all(...params, limit) as Record<string, unknown>[];
+
+  // Filter out items blocked by incomplete items
+  const doneIds = new Set(
+    (db.prepare("SELECT id FROM items WHERE status = 'done'").all() as { id: string }[])
+      .map(r => r.id)
+  );
+
+  const unblocked = rows.filter(row => {
+    const blockedBy: string[] = JSON.parse(row.blocked_by as string);
+    return blockedBy.every(id => doneIds.has(id));
+  });
+
+  res.json(unblocked.slice(0, limit).map(row => ({
+    ...row,
+    blocked_by: JSON.parse(row.blocked_by as string),
+    tags: JSON.parse(row.tags as string),
+  })));
+});

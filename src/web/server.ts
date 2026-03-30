@@ -3,8 +3,13 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { corsMiddleware, apiKeyAuth } from "./middleware.js";
 import { projectsRouter } from "./routes/projects.js";
-import { itemsRouter } from "./routes/items.js";
+import { itemsRouter, nextWorkRouter } from "./routes/items.js";
 import { sessionsRouter } from "./routes/sessions.js";
+import { scanRouter } from "./routes/scan.js";
+import { settingsRouter } from "./routes/settings.js";
+import { executeRouter } from "./routes/execute.js";
+import { startScheduler } from "../executor/scheduler.js";
+import { getDb } from "../db.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -18,7 +23,34 @@ export function startWebServer(port: number): void {
   // REST API routes
   app.use("/api/projects", projectsRouter);
   app.use("/api/items", itemsRouter);
+  app.use("/api/next-work", nextWorkRouter);
   app.use("/api/sessions", sessionsRouter);
+  app.use("/api/scan-projects", scanRouter);
+  app.use("/api/settings", settingsRouter);
+  app.use("/api/execute", executeRouter);
+
+  const db = getDb();
+
+  // Archive done items older than 7 days — run on startup and daily
+  function archiveOldDoneItems() {
+    const now = new Date().toISOString();
+    db.prepare(`
+      UPDATE items SET status = 'archived', updated_at = ?
+      WHERE status = 'done'
+        AND completed_at IS NOT NULL
+        AND completed_at < datetime('now', '-7 days')
+    `).run(now);
+  }
+  archiveOldDoneItems();
+  setInterval(archiveOldDoneItems, 24 * 60 * 60 * 1000);
+
+  // Start Mode B scheduler if enabled
+  const modeBRow = db
+    .prepare("SELECT value FROM settings WHERE key = 'mode_b_enabled'")
+    .get() as { value: string } | undefined;
+  if (modeBRow?.value === "true") {
+    startScheduler(db);
+  }
 
   // Health check
   app.get("/api/health", (_req, res) => {

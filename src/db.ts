@@ -70,4 +70,28 @@ function migrate(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_items_status ON items(status);
     CREATE INDEX IF NOT EXISTS idx_sessions_project ON sessions(project_id);
   `);
+
+  // v2.3 migrations — execution columns (safe re-run)
+  for (const col of [
+    "ALTER TABLE items ADD COLUMN execution_status TEXT",
+    "ALTER TABLE items ADD COLUMN last_executed_at TEXT",
+    "ALTER TABLE items ADD COLUMN execution_output TEXT",
+  ]) {
+    try { db.exec(col); } catch { /* column already exists */ }
+  }
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS settings (
+      key   TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+  `);
+
+  // Insert defaults only when key doesn't exist
+  const insertDefault = db.prepare(
+    "INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)"
+  );
+  insertDefault.run("mode_a_enabled", "false");
+  insertDefault.run("mode_b_enabled", "false");
+  insertDefault.run("mode_b_interval_minutes", "60");
 }
