@@ -162,6 +162,7 @@ Auth: Optional `Authorization: Bearer <FOREMAN_API_KEY>` header (skipped if env 
 | Method | Path | Description |
 |--------|------|-------------|
 | GET | `/api/next-work` | pm_next_work equivalent (query: project_id, limit) |
+| GET | `/api/scan-projects` | Scan filesystem for git/npm projects (query: path) — returns `{ name, path, already_registered }[]` |
 
 ---
 
@@ -175,9 +176,12 @@ web/
     api/
       client.ts           # All fetch() calls, typed responses
     components/
-      Sidebar.tsx          # Left nav, project list
+      Sidebar.tsx          # Left nav, project list, Scan + Add Manual buttons
       ItemCard.tsx         # Kanban card
       ItemDrawer.tsx       # Slide-over detail/edit panel (v2.1)
+      NewItemModal.tsx     # Global + New Item modal with project selector (v2.2)
+      ScanProjectsModal.tsx # Scan filesystem for projects, bulk-register (v2.2)
+      AddProjectModal.tsx  # Register project by pasting path (v2.2)
       StatusBadge.tsx      # Color-coded status chip
       TagBadge.tsx         # Category/ROI/effort tags
     pages/

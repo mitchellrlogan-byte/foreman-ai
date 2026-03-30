@@ -85,15 +85,19 @@ Existing tools (Jira, Linear, GitHub Issues) are designed for human-facing workf
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
+| Quick-add items (inline) | `+ Add item` footer on each kanban column — type title, hit Enter, done | Must Have |
+| Quick-add items (global) | `+ New Item` button in header opens modal with project selector | Must Have |
+| Scan for Projects | Button in sidebar scans a user-specified directory for git/npm projects, shows checklist to bulk-register | Must Have |
+| Add Project manually | Button in sidebar to register a project by pasting full path | Must Have |
 | Session analytics page | Duration, items touched, velocity over time | Should Have |
 | Search / filter UI | Full-text title search, filter by tag/category/status | Should Have |
 | Sort controls | Sort by priority, ROI, created date in table view | Should Have |
-| pm_next_work widget | Prominent "What to work on" section on dashboard | Must Have |
 
 ### 6.4 Power Features (v2.3)
 
 | Feature | Description | Priority |
 |---------|-------------|----------|
+| Native installer (.exe / .dmg) | One-click installer for non-technical Claude users — no terminal required | Should Have |
 | Auto-execution dispatch | Trigger Claude to execute `auto` mode items | Could Have |
 | Dependency graph | Visual graph of `blocked_by` relationships | Could Have |
 | Export (CSV/JSON) | Export backlog from dashboard | Could Have |
@@ -102,7 +106,7 @@ Existing tools (Jira, Linear, GitHub Issues) are designed for human-facing workf
 
 ## 7. Release Plan
 
-### v2.1 — Dashboard Redesign (Current Sprint)
+### v2.1 — Dashboard Redesign *(shipped)*
 **Goal:** Complete the web dashboard so it's fully usable for day-to-day project management.
 
 - New visual design (Midnight + Teal)
@@ -110,29 +114,31 @@ Existing tools (Jira, Linear, GitHub Issues) are designed for human-facing workf
 - Project board (kanban) + table toggle
 - Item detail slide-over drawer
 - Edit and delete items in UI
-- Boards are functional end-to-end
+- API key auth gate
 
-**Success Criteria:** Can manage an entire project backlog without ever touching the MCP CLI.
+**Success Criteria:** Can manage an entire project backlog without ever touching the MCP CLI. ✓
 
-### v2.2 — Smart Features
-**Goal:** Make the dashboard feel AI-native, not just a CRUD app.
+### v2.2 — Project Management UX *(current sprint)*
+**Goal:** Make the dashboard fully self-sufficient — register projects and create items without ever touching the CLI.
 
-- Session analytics page with productivity charts
-- Search and filter controls
-- Sort by priority/ROI in table view
-- Refine pm_next_work display (explanations for why each item is ranked)
+- Quick-add items inline on kanban columns (no page navigation)
+- Global `+ New Item` button with project selector (works from Dashboard)
+- Scan for Projects: discover git/npm repos by directory, bulk-register from a checklist
+- Add Project manually: paste a full path to register any project instantly
 
-**Success Criteria:** Looking at the dashboard tells you everything you need to know in under 10 seconds.
+**Success Criteria:** A new user can install Foreman, open the dashboard, register all their projects, and add their first backlog items — entirely in the browser.
 
 ### v2.3 — Power Features
-**Goal:** Unlock advanced capabilities for power users.
+**Goal:** Unlock advanced capabilities for power users and non-technical users.
 
+- Native installer (.exe / .dmg) — no terminal required for setup
+- Session analytics page with productivity charts
+- Search and filter controls
 - Auto-execution: Claude can pick up and execute `auto` mode items autonomously
 - Dependency visualization
-- Export functionality
-- Optional: GitHub Issues sync
+- Export functionality (CSV/JSON)
 
-**Success Criteria:** An AI agent can manage and execute its own backlog with minimal human intervention.
+**Success Criteria:** A non-developer Claude user can install and use Foreman without opening a terminal.
 
 ---
 

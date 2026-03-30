@@ -91,6 +91,9 @@ Open `http://localhost:4040`:
 - **Board view** — Kanban columns per project (Backlog → Ready → In Progress → Done)
 - **Table view** — dense MS-Project-style data grid, sortable by priority/ROI
 - **Item detail drawer** — click any item to view and edit all fields inline
+- **Quick-add items** — `+ Add item` at the bottom of any column, or the global `+ New Item` button from anywhere
+- **Scan for Projects** — point it at a directory, it finds all your git/npm repos and lets you register them in one click
+- **Add Project manually** — paste a full path to register any project instantly
 - Mobile-friendly — add items from your phone
 
 Optional API key auth: `FOREMAN_API_KEY=yourkey foreman-ai --web`
@@ -195,14 +198,14 @@ The database directory is created automatically on first run.
 
 ## Roadmap
 
-**v2.1 — Dashboard polish** *(in progress)*
-Full board and table views, item detail drawer, edit/delete in UI, new visual design.
+**v2.1 — Dashboard redesign** *(shipped)*
+Full board and table views, item detail drawer, edit/delete in UI, Midnight+Teal visual design, API key auth.
 
-**v2.2 — Smart features**
-Session analytics, full-text search, sort controls, enhanced `pm_next_work` display.
+**v2.2 — Project management UX** *(current)*
+Quick-add items from anywhere. Scan your filesystem to discover and register projects in one click. No CLI required.
 
-**v2.3 — Auto-execution**
-Claude picks up `execution_mode: "auto"` items and executes them autonomously. The backlog manages itself.
+**v2.3 — Power features**
+Native installer (.exe / .dmg) for non-technical users. Auto-execution: Claude picks up `execution_mode: "auto"` items and executes them autonomously.
 
 ---
 
