@@ -94,9 +94,26 @@ Open `http://localhost:4040`:
 - **Quick-add items** — `+ Add item` at the bottom of any column, or the global `+ New Item` button from anywhere
 - **Scan for Projects** — point it at a directory, it finds all your git/npm repos and lets you register them in one click
 - **Add Project manually** — paste a full path to register any project instantly
+- **Execution page** — toggle auto-execution modes, see the auto queue, trigger manual runs
 - Mobile-friendly — add items from your phone
 
 Optional API key auth: `FOREMAN_API_KEY=yourkey foreman-ai --web`
+
+---
+
+## Auto-Execution
+
+Let Claude work through your backlog autonomously. Mark any item as `execution_mode: auto` and enable one of three modes from the **Execution** page:
+
+| Mode | How it works |
+|------|-------------|
+| **A — Session start** | Writes a hook to `~/.claude/CLAUDE.md`. At the start of every Claude Code session, Claude calls `pm_next_work` and picks up auto items before starting anything else. |
+| **B — Scheduled** | Runs in the background on a configurable interval (30 min / 1 hour / 4 hours / 8 hours / daily). |
+| **C — Manual** | Click "Run Now" from the dashboard to trigger a single execution immediately. |
+
+Each run spawns `claude --print --dangerously-skip-permissions` in the project's repo, with a 30-minute timeout. Claude is prompted to call `pm_update_item` when done to mark items `done` or `in_progress`. Execution output is stored on the item and visible in the auto queue.
+
+**Requires:** `claude` CLI installed globally — `npm install -g @anthropic/claude-code`
 
 ---
 
@@ -201,11 +218,11 @@ The database directory is created automatically on first run.
 **v2.1 — Dashboard redesign** *(shipped)*
 Full board and table views, item detail drawer, edit/delete in UI, Midnight+Teal visual design, API key auth.
 
-**v2.2 — Project management UX** *(current)*
+**v2.2 — Project management UX** *(shipped)*
 Quick-add items from anywhere. Scan your filesystem to discover and register projects in one click. No CLI required.
 
-**v2.3 — Power features**
-Native installer (.exe / .dmg) for non-technical users. Auto-execution: Claude picks up `execution_mode: "auto"` items and executes them autonomously.
+**v2.3 — Auto-Execution** *(current)*
+Claude autonomously picks up and executes backlog items marked `execution_mode: "auto"`. Three toggleable modes from the dashboard: Mode A (session start — writes a hook to `~/.claude/CLAUDE.md`), Mode B (background scheduler), Mode C (manual "Run Now" trigger). Requires `claude` CLI (`npm install -g @anthropic/claude-code`).
 
 ---
 
