@@ -5,6 +5,7 @@ import { corsMiddleware, apiKeyAuth } from "./middleware.js";
 import { projectsRouter } from "./routes/projects.js";
 import { itemsRouter, nextWorkRouter } from "./routes/items.js";
 import { sessionsRouter } from "./routes/sessions.js";
+import { scanRouter } from "./routes/scan.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -20,6 +21,7 @@ export function startWebServer(port: number): void {
   app.use("/api/items", itemsRouter);
   app.use("/api/next-work", nextWorkRouter);
   app.use("/api/sessions", sessionsRouter);
+  app.use("/api/scan-projects", scanRouter);
 
   // Health check
   app.get("/api/health", (_req, res) => {
