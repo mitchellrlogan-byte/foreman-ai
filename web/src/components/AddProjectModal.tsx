@@ -1,13 +1,10 @@
 import { useState, type FormEvent, type ReactNode } from "react";
 import { api, type Project } from "../lib/api";
+import { slugify } from "../lib/utils";
 
 interface AddProjectModalProps {
   onClose: () => void;
   onAdded: (project: Project) => void;
-}
-
-function slugify(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 export function AddProjectModal({ onClose, onAdded }: AddProjectModalProps) {

@@ -145,15 +145,19 @@ function QuickAdd({ projectId, status, onCreated }: {
   const [active, setActive] = useState(false);
   const [title, setTitle] = useState("");
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit() {
     if (!title.trim()) return;
     setSaving(true);
+    setError("");
     try {
       const item = await api.items.create({ project_id: projectId, title: title.trim(), status, source: "user" });
       onCreated(item);
       setTitle("");
       setActive(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to create item");
     } finally {
       setSaving(false);
     }
@@ -184,6 +188,7 @@ function QuickAdd({ projectId, status, onCreated }: {
         disabled={saving}
         className="w-full bg-[#0a1628] border border-[#0ea5e9] rounded px-2 py-1.5 text-[11px] text-[#e0f2fe] focus:outline-none placeholder:text-[#1e4060]"
       />
+      {error && <p className="text-[9px] text-[#f87171] mt-0.5">{error}</p>}
       <div className="flex gap-1 mt-1">
         <button
           onClick={handleSubmit} disabled={saving || !title.trim()}

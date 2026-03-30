@@ -1,13 +1,10 @@
 import { useState } from "react";
 import { api, type Project, type ScanResult } from "../lib/api";
+import { slugify } from "../lib/utils";
 
 interface ScanProjectsModalProps {
   onClose: () => void;
   onAdded: (projects: Project[]) => void;
-}
-
-function slugify(name: string): string {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
 export function ScanProjectsModal({ onClose, onAdded }: ScanProjectsModalProps) {
@@ -39,12 +36,19 @@ export function ScanProjectsModal({ onClose, onAdded }: ScanProjectsModalProps) 
     setRegistering(true);
     const toRegister = results.filter(r => selected.has(r.path));
     const added: Project[] = [];
+    const usedSlugs = new Set<string>();
     for (const r of toRegister) {
       try {
-        const p = await api.projects.create({ id: slugify(r.name), name: r.name, repo_path: r.path });
+        let id = slugify(r.name);
+        let suffix = 2;
+        while (usedSlugs.has(id)) {
+          id = `${slugify(r.name)}-${suffix++}`;
+        }
+        usedSlugs.add(id);
+        const p = await api.projects.create({ id, name: r.name, repo_path: r.path });
         added.push(p);
       } catch {
-        // skip duplicates
+        // skip on server-side errors
       }
     }
     onAdded(added);
