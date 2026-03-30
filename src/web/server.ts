@@ -29,8 +29,22 @@ export function startWebServer(port: number): void {
   app.use("/api/settings", settingsRouter);
   app.use("/api/execute", executeRouter);
 
-  // Start Mode B scheduler if enabled
   const db = getDb();
+
+  // Archive done items older than 7 days — run on startup and daily
+  function archiveOldDoneItems() {
+    const now = new Date().toISOString();
+    db.prepare(`
+      UPDATE items SET status = 'archived', updated_at = ?
+      WHERE status = 'done'
+        AND completed_at IS NOT NULL
+        AND completed_at < datetime('now', '-7 days')
+    `).run(now);
+  }
+  archiveOldDoneItems();
+  setInterval(archiveOldDoneItems, 24 * 60 * 60 * 1000);
+
+  // Start Mode B scheduler if enabled
   const modeBRow = db
     .prepare("SELECT value FROM settings WHERE key = 'mode_b_enabled'")
     .get() as { value: string } | undefined;

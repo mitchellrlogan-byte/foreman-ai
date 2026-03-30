@@ -218,7 +218,7 @@ function BoardColumn({ status, label, color, items, projectId, onSelect, onCreat
             className={`transition-opacity ${dragOverId === item.id ? "opacity-40 border-t-2 border-[#0ea5e9]" : ""}`}
             style={{ cursor: "grab" }}
           >
-            <ItemCard item={item} onClick={() => onSelect(item)} onDeleted={onDeleted} />
+            <ItemCard item={item} onClick={() => onSelect(item)} onDeleted={onDeleted} compact={status === "done"} />
           </div>
         ))}
         {items.length === 0 && (

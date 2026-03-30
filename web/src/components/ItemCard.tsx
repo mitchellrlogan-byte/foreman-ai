@@ -8,10 +8,11 @@ const CATEGORY_STYLES: Record<string, { bg: string; text: string }> = {
   research: { bg: "#0f2a1a",  text: "#34d399" },
 };
 
-export function ItemCard({ item, onClick, onDeleted }: {
+export function ItemCard({ item, onClick, onDeleted, compact }: {
   item: Item;
   onClick?: () => void;
   onDeleted?: (id: string) => void;
+  compact?: boolean;
 }) {
   const [hovered, setHovered] = useState(false);
   const catStyle = CATEGORY_STYLES[item.category] ?? CATEGORY_STYLES.feature;
@@ -24,6 +25,27 @@ export function ItemCard({ item, onClick, onDeleted }: {
   function handleDelete(e: React.MouseEvent) {
     e.stopPropagation();
     api.items.delete(item.id).then(() => onDeleted?.(item.id)).catch(() => {});
+  }
+
+  if (compact) {
+    return (
+      <div
+        className="relative flex items-center gap-1.5 px-2 py-1 mb-0.5 rounded cursor-pointer hover:bg-[#0c1e30] transition-colors group"
+        onClick={onClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+      >
+        <span className="text-[10px] text-[#4b6a8a] truncate flex-1 pr-3">{item.title}</span>
+        {hovered && onDeleted && (
+          <button
+            onClick={handleDelete}
+            className="absolute right-1 w-4 h-4 flex items-center justify-center rounded text-[#4b6a8a] hover:text-[#f87171] hover:bg-[#2d0f0f] transition-colors text-[10px] leading-none flex-shrink-0"
+          >
+            ×
+          </button>
+        )}
+      </div>
+    );
   }
 
   return (
