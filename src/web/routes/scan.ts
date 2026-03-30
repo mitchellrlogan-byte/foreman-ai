@@ -10,15 +10,15 @@ scanRouter.get("/", (req, res) => {
   const rawPath = (req.query.path as string) || os.homedir();
   const scanPath = rawPath.replace(/^~/, os.homedir());
 
-  if (!fs.existsSync(scanPath)) {
-    res.status(400).json({ error: `Path does not exist: ${scanPath}` });
+  if (!fs.existsSync(scanPath) || !fs.statSync(scanPath).isDirectory()) {
+    res.status(400).json({ error: `Path does not exist or is not a directory: ${scanPath}` });
     return;
   }
 
   const db = getDb();
   const registeredPaths = new Set(
     (db.prepare("SELECT repo_path FROM projects").all() as { repo_path: string }[])
-      .map(r => r.repo_path)
+      .map(r => path.normalize(r.repo_path))
   );
 
   const results: { name: string; path: string; already_registered: boolean }[] = [];
@@ -45,7 +45,7 @@ scanRouter.get("/", (req, res) => {
         results.push({
           name: entry.name,
           path: fullPath,
-          already_registered: registeredPaths.has(fullPath),
+          already_registered: registeredPaths.has(path.normalize(fullPath)),
         });
       } else {
         scan(fullPath, depth + 1);
