@@ -7,6 +7,8 @@ export function AddItem() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [acceptanceCriteria, setAcceptanceCriteria] = useState("");
+  const [notes, setNotes] = useState("");
   const [category, setCategory] = useState("feature");
   const [effort, setEffort] = useState("");
   const [executionMode, setExecutionMode] = useState("auto");
@@ -20,6 +22,8 @@ export function AddItem() {
       project_id: projectId,
       title: title.trim(),
       description: description.trim() || undefined,
+      acceptance_criteria: acceptanceCriteria.trim() || undefined,
+      notes: notes.trim() || undefined,
       category,
       effort: effort as "small" | "medium" | "large" | undefined || undefined,
       execution_mode: executionMode,
@@ -48,7 +52,23 @@ export function AddItem() {
           <textarea
             value={description} onChange={e => setDescription(e.target.value)} rows={3}
             className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded-md px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
-            placeholder="Details, context, acceptance criteria..."
+            placeholder="Details and context..."
+          />
+        </Field>
+
+        <Field label="Acceptance Criteria">
+          <textarea
+            value={acceptanceCriteria} onChange={e => setAcceptanceCriteria(e.target.value)} rows={3}
+            className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded-md px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
+            placeholder="What does done look like? e.g. - User can log in&#10;- Error message shown on failure"
+          />
+        </Field>
+
+        <Field label="Notes">
+          <textarea
+            value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+            className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded-md px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
+            placeholder="Freeform notes, links, decisions..."
           />
         </Field>
 

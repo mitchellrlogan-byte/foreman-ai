@@ -2,6 +2,7 @@ import { useState, useEffect, type ChangeEvent, type ReactNode } from "react";
 import { api, type Item } from "../lib/api";
 import { StatusBadge } from "./StatusBadge";
 
+type Attachment = { name: string; url: string };
 
 interface ItemDrawerProps {
   item: Item | null;
@@ -19,12 +20,16 @@ export function ItemDrawer({ item, onClose, onUpdated, onDeleted }: ItemDrawerPr
   const [saving, setSaving] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [form, setForm] = useState<Partial<Item>>({});
+  const [newAttachName, setNewAttachName] = useState("");
+  const [newAttachUrl, setNewAttachUrl] = useState("");
 
   useEffect(() => {
     if (item) {
       setForm({ ...item });
       setEditing(false);
       setConfirmDelete(false);
+      setNewAttachName("");
+      setNewAttachUrl("");
     }
   }, [item]);
 
@@ -36,6 +41,22 @@ export function ItemDrawer({ item, onClose, onUpdated, onDeleted }: ItemDrawerPr
     };
   }
 
+  function addAttachment() {
+    if (!newAttachName.trim() || !newAttachUrl.trim()) return;
+    const existing: Attachment[] = (form.attachments as Attachment[]) ?? [];
+    setForm(prev => ({
+      ...prev,
+      attachments: [...existing, { name: newAttachName.trim(), url: newAttachUrl.trim() }],
+    }));
+    setNewAttachName("");
+    setNewAttachUrl("");
+  }
+
+  function removeAttachment(index: number) {
+    const existing: Attachment[] = (form.attachments as Attachment[]) ?? [];
+    setForm(prev => ({ ...prev, attachments: existing.filter((_, i) => i !== index) }));
+  }
+
   async function handleSave() {
     if (!item) return;
     setSaving(true);
@@ -43,6 +64,9 @@ export function ItemDrawer({ item, onClose, onUpdated, onDeleted }: ItemDrawerPr
       const updated = await api.items.update(item.id, {
         title: form.title,
         description: form.description,
+        acceptance_criteria: form.acceptance_criteria,
+        notes: form.notes,
+        attachments: form.attachments,
         status: form.status,
         category: form.category,
         priority: typeof form.priority === "string" ? parseInt(form.priority) : form.priority,
@@ -65,6 +89,8 @@ export function ItemDrawer({ item, onClose, onUpdated, onDeleted }: ItemDrawerPr
     onDeleted(item.id);
     onClose();
   }
+
+  const attachments: Attachment[] = ((editing ? form.attachments : item.attachments) as Attachment[]) ?? [];
 
   return (
     <>
@@ -126,6 +152,101 @@ export function ItemDrawer({ item, onClose, onUpdated, onDeleted }: ItemDrawerPr
               <p className="text-[12px] text-[#94a3b8] leading-relaxed">
                 {item.description || <span className="text-[#1e4060] italic">No description</span>}
               </p>
+            )}
+          </div>
+
+          {/* Acceptance Criteria */}
+          <div>
+            <label className="block text-[9px] font-bold uppercase tracking-widest text-[#1e4060] mb-1">Acceptance Criteria</label>
+            {editing ? (
+              <textarea
+                value={form.acceptance_criteria ?? ""}
+                onChange={field("acceptance_criteria")}
+                rows={3}
+                placeholder="What does done look like?"
+                className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded px-3 py-2 text-[12px] text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
+              />
+            ) : item.acceptance_criteria ? (
+              <p className="text-[12px] text-[#94a3b8] leading-relaxed whitespace-pre-wrap">{item.acceptance_criteria}</p>
+            ) : (
+              <p className="text-[12px] text-[#1e4060] italic">Not specified</p>
+            )}
+          </div>
+
+          {/* Notes */}
+          <div>
+            <label className="block text-[9px] font-bold uppercase tracking-widest text-[#1e4060] mb-1">Notes</label>
+            {editing ? (
+              <textarea
+                value={form.notes ?? ""}
+                onChange={field("notes")}
+                rows={3}
+                placeholder="Freeform notes, links, decisions..."
+                className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded px-3 py-2 text-[12px] text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
+              />
+            ) : item.notes ? (
+              <p className="text-[12px] text-[#94a3b8] leading-relaxed whitespace-pre-wrap">{item.notes}</p>
+            ) : (
+              <p className="text-[12px] text-[#1e4060] italic">No notes</p>
+            )}
+          </div>
+
+          {/* Attachments */}
+          <div>
+            <label className="block text-[9px] font-bold uppercase tracking-widest text-[#1e4060] mb-1">Attachments</label>
+            {attachments.length > 0 ? (
+              <ul className="space-y-1 mb-2">
+                {attachments.map((att, i) => (
+                  <li key={i} className="flex items-center gap-2">
+                    <a
+                      href={att.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-[#38bdf8] hover:underline truncate flex-1"
+                    >
+                      {att.name}
+                    </a>
+                    {editing && (
+                      <button
+                        onClick={() => removeAttachment(i)}
+                        className="text-[#4b6a8a] hover:text-[#f87171] text-sm leading-none flex-shrink-0"
+                        title="Remove"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              !editing && <p className="text-[12px] text-[#1e4060] italic mb-2">No attachments</p>
+            )}
+            {editing && (
+              <div className="space-y-1.5">
+                <input
+                  value={newAttachName}
+                  onChange={e => setNewAttachName(e.target.value)}
+                  placeholder="Link name"
+                  className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded px-2 py-1.5 text-[11px] text-[#e0f2fe] focus:outline-none focus:border-[#0ea5e9] placeholder:text-[#1e4060]"
+                />
+                <div className="flex gap-1.5">
+                  <input
+                    value={newAttachUrl}
+                    onChange={e => setNewAttachUrl(e.target.value)}
+                    placeholder="URL or path"
+                    className="flex-1 bg-[#0c1e30] border border-[#1a3a5c] rounded px-2 py-1.5 text-[11px] text-[#e0f2fe] focus:outline-none focus:border-[#0ea5e9] placeholder:text-[#1e4060]"
+                    onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); addAttachment(); } }}
+                  />
+                  <button
+                    type="button"
+                    onClick={addAttachment}
+                    disabled={!newAttachName.trim() || !newAttachUrl.trim()}
+                    className="px-2.5 py-1.5 bg-[#0c2d4a] text-[#38bdf8] text-[10px] rounded hover:bg-[#0c3a5c] disabled:opacity-40 transition-colors"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 

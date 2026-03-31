@@ -11,6 +11,9 @@ interface NewItemModalProps {
 export function NewItemModal({ projects, defaultProjectId, onClose, onCreated }: NewItemModalProps) {
   const [projectId, setProjectId] = useState(defaultProjectId ?? projects[0]?.id ?? "");
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [acceptanceCriteria, setAcceptanceCriteria] = useState("");
+  const [notes, setNotes] = useState("");
   const [category, setCategory] = useState("feature");
   const [effort, setEffort] = useState("");
   const [saving, setSaving] = useState(false);
@@ -25,6 +28,9 @@ export function NewItemModal({ projects, defaultProjectId, onClose, onCreated }:
       const item = await api.items.create({
         project_id: projectId,
         title: title.trim(),
+        description: description.trim() || undefined,
+        acceptance_criteria: acceptanceCriteria.trim() || undefined,
+        notes: notes.trim() || undefined,
         category,
         effort: effort as Item["effort"] || undefined,
         source: "user",
@@ -67,6 +73,30 @@ export function NewItemModal({ projects, defaultProjectId, onClose, onCreated }:
                 autoFocus required
                 placeholder="What needs to be done?"
                 className="w-full bg-[#080f1a] border border-[#1a3a5c] rounded px-3 py-2 text-sm text-[#e0f2fe] focus:outline-none focus:border-[#0ea5e9] placeholder:text-[#1e4060]"
+              />
+            </Field>
+
+            <Field label="Description">
+              <textarea
+                value={description} onChange={e => setDescription(e.target.value)} rows={2}
+                placeholder="Details and context..."
+                className="w-full bg-[#080f1a] border border-[#1a3a5c] rounded px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
+              />
+            </Field>
+
+            <Field label="Acceptance Criteria">
+              <textarea
+                value={acceptanceCriteria} onChange={e => setAcceptanceCriteria(e.target.value)} rows={2}
+                placeholder="What does done look like?"
+                className="w-full bg-[#080f1a] border border-[#1a3a5c] rounded px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
+              />
+            </Field>
+
+            <Field label="Notes">
+              <textarea
+                value={notes} onChange={e => setNotes(e.target.value)} rows={2}
+                placeholder="Freeform notes, links, decisions..."
+                className="w-full bg-[#080f1a] border border-[#1a3a5c] rounded px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
               />
             </Field>
 

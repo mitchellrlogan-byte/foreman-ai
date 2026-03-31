@@ -80,6 +80,15 @@ function migrate(db: Database.Database): void {
     try { db.exec(col); } catch { /* column already exists */ }
   }
 
+  // v2.4 migrations — acceptance criteria, notes, attachments (safe re-run)
+  for (const col of [
+    "ALTER TABLE items ADD COLUMN acceptance_criteria TEXT",
+    "ALTER TABLE items ADD COLUMN notes TEXT",
+    "ALTER TABLE items ADD COLUMN attachments TEXT DEFAULT '[]'",
+  ]) {
+    try { db.exec(col); } catch { /* column already exists */ }
+  }
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS settings (
       key   TEXT PRIMARY KEY,
