@@ -63,7 +63,7 @@ export function startWebServer(port: number): void {
 
   // SPA fallback — serve index.html for all non-API routes
   app.use((_req, res) => {
-    res.sendFile(path.join(webDist, "index.html"));
+    res.sendFile("index.html", { root: webDist });
   });
 
   app.listen(port, () => {
