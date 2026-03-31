@@ -12,8 +12,13 @@
     "build": "tsc",
     "build:web": "cd web && npm run build",
     "build:all": "tsc && cd web && npm run build",
+    "build:electron": "tsc -p electron-app/tsconfig.json",
     "dev": "tsc --watch",
     "dev:web": "cd web && npm run dev",
+    "electron:dev": "npm run build:electron && electron electron-dist/main.js",
+    "dist:win": "npm run build:all && npm run build:electron && electron-builder --win",
+    "dist:mac": "npm run build:all && npm run build:electron && electron-builder --mac",
+    "dist:linux": "npm run build:all && npm run build:electron && electron-builder --linux",
     "start": "node dist/index.js",
     "dashboard": "node dist/index.js --web",
     "prepublishOnly": "npm run build:all"
@@ -46,6 +51,8 @@
     "@types/express": "^5.0.6",
     "@types/node": "^25.5.0",
     "@types/uuid": "^10.0.0",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
     "typescript": "^6.0.2"
   }
 }
