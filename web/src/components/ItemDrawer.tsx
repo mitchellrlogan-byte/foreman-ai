@@ -2,6 +2,7 @@ import { useState, useEffect, type ChangeEvent, type ReactNode } from "react";
 import { api, type Item } from "../lib/api";
 import { StatusBadge } from "./StatusBadge";
 
+
 interface ItemDrawerProps {
   item: Item | null;
   onClose: () => void;

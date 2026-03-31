@@ -7,6 +7,7 @@ import { ProjectView } from "./pages/ProjectView";
 import { AddItem } from "./pages/AddItem";
 import { api, type Project } from "./lib/api";
 import { ExecutionPage } from "./pages/ExecutionPage";
+import { Sessions } from "./pages/Sessions";
 
 export default function App() {
   return (
@@ -57,6 +58,7 @@ function AppInner() {
             <Route path="/project/:id" element={<ProjectView />} />
             <Route path="/project/:id/add" element={<AddItem />} />
             <Route path="/execution" element={<ExecutionPage />} />
+            <Route path="/sessions" element={<Sessions />} />
           </Routes>
         </main>
       </div>

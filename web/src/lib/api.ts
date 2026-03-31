@@ -76,12 +76,34 @@ export interface Item {
   execution_status: string | null;
   last_executed_at: string | null;
   execution_output: string | null;
+  acceptance_criteria?: string;
+  notes?: string;
+  attachments?: Array<{ name: string; url: string }>;
 }
 
 export interface ScanResult {
   name: string;
   path: string;
   already_registered: boolean;
+}
+
+export interface Session {
+  id: string;
+  project_id: string;
+  started_at: string;
+  ended_at: string | null;
+  summary: string;
+  items_touched: string[];
+}
+
+export interface SessionAnalytics {
+  totalSessions: number;
+  completedSessions: number;
+  totalDurationMs: number;
+  avgDurationMs: number;
+  mostActiveProject: string | null;
+  perProject: Record<string, { count: number; totalMs: number; lastActive: string }>;
+  sessions: Session[];
 }
 
 export const api = {
@@ -125,4 +147,19 @@ export const api = {
       }),
   },
   execute: () => request<{ started: boolean; reason?: string; item_id?: string; execution_status?: string }>("/execute", { method: "POST" }),
+  sessions: {
+    list: (params?: { project_id?: string; limit?: number; all?: boolean }) => {
+      const qs = params
+        ? "?" + new URLSearchParams(
+            Object.fromEntries(
+              Object.entries(params)
+                .filter(([, v]) => v != null)
+                .map(([k, v]) => [k, String(v)])
+            )
+          ).toString()
+        : "";
+      return request<Session[]>(`/sessions${qs}`);
+    },
+    analytics: () => request<SessionAnalytics>("/sessions/analytics"),
+  },
 };
