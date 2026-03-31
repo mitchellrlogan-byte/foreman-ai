@@ -8,6 +8,7 @@ function rowToItem(row: Record<string, unknown>): Item {
     ...row,
     blocked_by: JSON.parse(row.blocked_by as string),
     tags: JSON.parse(row.tags as string),
+    attachments: row.attachments ? JSON.parse(row.attachments as string) : [],
   } as Item;
 }
 
@@ -77,8 +78,10 @@ itemsRouter.post("/", (req, res) => {
   db.prepare(`
     INSERT INTO items (id, project_id, title, description, status, priority, category,
       roi_score, roi_reason, effort, blocked_by, tags, source, execution_mode,
-      assigned_to, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      assigned_to, acceptance_criteria, notes, attachments,
+      due_date, story_points, user_story, severity, environment,
+      created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     b.project_id,
@@ -95,6 +98,14 @@ itemsRouter.post("/", (req, res) => {
     b.source ?? "user",
     b.execution_mode ?? "manual",
     b.assigned_to ?? "",
+    b.acceptance_criteria ?? null,
+    b.notes ?? null,
+    JSON.stringify(b.attachments ?? []),
+    b.due_date ?? null,
+    b.story_points ?? null,
+    b.user_story ?? null,
+    b.severity ?? null,
+    b.environment ?? null,
     now,
     now
   );
@@ -115,7 +126,7 @@ itemsRouter.patch("/:id", (req, res) => {
 
   for (const [key, value] of Object.entries(updates)) {
     if (value === undefined) continue;
-    if (key === "blocked_by" || key === "tags") {
+    if (key === "blocked_by" || key === "tags" || key === "attachments") {
       sets.push(`${key} = ?`);
       values.push(JSON.stringify(value));
     } else {

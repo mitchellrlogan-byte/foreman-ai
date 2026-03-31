@@ -50,6 +50,14 @@ export interface Item {
   execution_status: ExecutionStatus | null;
   last_executed_at: string | null;
   execution_output: string | null;
+  acceptance_criteria?: string;
+  notes?: string;
+  attachments?: Array<{ name: string; url: string }>;
+  due_date?: string | null;
+  story_points?: number | null;
+  user_story?: string | null;
+  severity?: "critical" | "high" | "medium" | "low" | null;
+  environment?: string | null;
 }
 
 export interface Session {
