@@ -7,10 +7,15 @@ export function AddItem() {
   const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [userStory, setUserStory] = useState("");
   const [acceptanceCriteria, setAcceptanceCriteria] = useState("");
   const [notes, setNotes] = useState("");
   const [category, setCategory] = useState("feature");
   const [effort, setEffort] = useState("");
+  const [storyPoints, setStoryPoints] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [severity, setSeverity] = useState("");
+  const [environment, setEnvironment] = useState("");
   const [executionMode, setExecutionMode] = useState("auto");
   const [saving, setSaving] = useState(false);
 
@@ -22,10 +27,15 @@ export function AddItem() {
       project_id: projectId,
       title: title.trim(),
       description: description.trim() || undefined,
+      user_story: userStory.trim() || undefined,
       acceptance_criteria: acceptanceCriteria.trim() || undefined,
       notes: notes.trim() || undefined,
       category,
       effort: effort as "small" | "medium" | "large" | undefined || undefined,
+      story_points: storyPoints ? parseInt(storyPoints) : undefined,
+      due_date: dueDate || undefined,
+      severity: (severity as "critical" | "high" | "medium" | "low") || undefined,
+      environment: environment.trim() || undefined,
       execution_mode: executionMode,
       source: "user",
     });
@@ -53,6 +63,14 @@ export function AddItem() {
             value={description} onChange={e => setDescription(e.target.value)} rows={3}
             className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded-md px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
             placeholder="Details and context..."
+          />
+        </Field>
+
+        <Field label="User Story">
+          <textarea
+            value={userStory} onChange={e => setUserStory(e.target.value)} rows={2}
+            className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded-md px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
+            placeholder="As a [user], I want [feature], so that [benefit]..."
           />
         </Field>
 
@@ -92,6 +110,45 @@ export function AddItem() {
             </select>
           </Field>
         </div>
+
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Story Points">
+            <input
+              type="number" min="1" max="100" value={storyPoints}
+              onChange={e => setStoryPoints(e.target.value)}
+              className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded-md px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] placeholder:text-[#1e4060]"
+              placeholder="e.g. 3"
+            />
+          </Field>
+          <Field label="Due Date">
+            <input
+              type="date" value={dueDate} onChange={e => setDueDate(e.target.value)}
+              className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded-md px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] [color-scheme:dark]"
+            />
+          </Field>
+        </div>
+
+        {category === "bug" && (
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Severity">
+              <select value={severity} onChange={e => setSeverity(e.target.value)}
+                className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded-md px-3 py-2 text-sm text-[#94a3b8] focus:outline-none">
+                <option value="">Unknown</option>
+                <option value="critical">Critical</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </Field>
+            <Field label="Environment">
+              <input
+                type="text" value={environment} onChange={e => setEnvironment(e.target.value)}
+                className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded-md px-3 py-2 text-sm text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] placeholder:text-[#1e4060]"
+                placeholder="prod / staging / local"
+              />
+            </Field>
+          </div>
+        )}
 
         <Field label="Execution Mode">
           <div className="flex gap-5">

@@ -89,6 +89,17 @@ function migrate(db: Database.Database): void {
     try { db.exec(col); } catch { /* column already exists */ }
   }
 
+  // v2.5 migrations — Jira-inspired fields (safe re-run)
+  for (const col of [
+    "ALTER TABLE items ADD COLUMN due_date TEXT",
+    "ALTER TABLE items ADD COLUMN story_points INTEGER",
+    "ALTER TABLE items ADD COLUMN user_story TEXT",
+    "ALTER TABLE items ADD COLUMN severity TEXT",
+    "ALTER TABLE items ADD COLUMN environment TEXT",
+  ]) {
+    try { db.exec(col); } catch { /* column already exists */ }
+  }
+
   db.exec(`
     CREATE TABLE IF NOT EXISTS settings (
       key   TEXT PRIMARY KEY,

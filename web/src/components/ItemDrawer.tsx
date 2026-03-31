@@ -64,6 +64,7 @@ export function ItemDrawer({ item, onClose, onUpdated, onDeleted }: ItemDrawerPr
       const updated = await api.items.update(item.id, {
         title: form.title,
         description: form.description,
+        user_story: form.user_story,
         acceptance_criteria: form.acceptance_criteria,
         notes: form.notes,
         attachments: form.attachments,
@@ -73,7 +74,13 @@ export function ItemDrawer({ item, onClose, onUpdated, onDeleted }: ItemDrawerPr
         roi_score: form.roi_score != null
           ? (typeof form.roi_score === "string" ? parseInt(form.roi_score) || null : form.roi_score)
           : null,
+        story_points: form.story_points != null
+          ? (typeof form.story_points === "string" ? parseInt(form.story_points) || null : form.story_points)
+          : null,
         effort: form.effort as Item["effort"],
+        due_date: form.due_date ?? null,
+        severity: form.severity as Item["severity"],
+        environment: form.environment,
         execution_mode: form.execution_mode,
       });
       onUpdated(updated);
@@ -152,6 +159,24 @@ export function ItemDrawer({ item, onClose, onUpdated, onDeleted }: ItemDrawerPr
               <p className="text-[12px] text-[#94a3b8] leading-relaxed">
                 {item.description || <span className="text-[#1e4060] italic">No description</span>}
               </p>
+            )}
+          </div>
+
+          {/* User Story */}
+          <div>
+            <label className="block text-[9px] font-bold uppercase tracking-widest text-[#1e4060] mb-1">User Story</label>
+            {editing ? (
+              <textarea
+                value={form.user_story ?? ""}
+                onChange={field("user_story")}
+                rows={2}
+                placeholder="As a [user], I want [feature], so that [benefit]..."
+                className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded px-3 py-2 text-[12px] text-[#94a3b8] focus:outline-none focus:border-[#0ea5e9] resize-none placeholder:text-[#1e4060]"
+              />
+            ) : item.user_story ? (
+              <p className="text-[12px] text-[#94a3b8] leading-relaxed whitespace-pre-wrap">{item.user_story}</p>
+            ) : (
+              <p className="text-[12px] text-[#1e4060] italic">Not specified</p>
             )}
           </div>
 
@@ -309,6 +334,71 @@ export function ItemDrawer({ item, onClose, onUpdated, onDeleted }: ItemDrawerPr
               )}
             </DrawerField>
           </div>
+
+          {/* Story Points + Due Date */}
+          <div className="grid grid-cols-2 gap-3">
+            <DrawerField label="Story Points">
+              {editing ? (
+                <input type="number" min="1" max="100" value={form.story_points ?? ""} onChange={field("story_points")}
+                  placeholder="e.g. 3"
+                  className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded px-2 py-1.5 text-[11px] text-[#94a3b8] focus:outline-none" />
+              ) : (
+                <span className="text-[12px] font-semibold text-[#a78bfa]">
+                  {item.story_points ?? <span className="text-[#1e4060]">—</span>}
+                </span>
+              )}
+            </DrawerField>
+
+            <DrawerField label="Due Date">
+              {editing ? (
+                <input type="date" value={form.due_date ?? ""} onChange={field("due_date")}
+                  className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded px-2 py-1.5 text-[11px] text-[#94a3b8] focus:outline-none [color-scheme:dark]" />
+              ) : item.due_date ? (
+                <span className="text-[12px] text-[#f59e0b]">
+                  {new Date(item.due_date).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                </span>
+              ) : (
+                <span className="text-[12px] text-[#1e4060]">—</span>
+              )}
+            </DrawerField>
+          </div>
+
+          {/* Severity + Environment (bugs only) */}
+          {((editing ? form.category : item.category) === "bug") && (
+            <div className="grid grid-cols-2 gap-3">
+              <DrawerField label="Severity">
+                {editing ? (
+                  <select value={form.severity ?? ""} onChange={field("severity")}
+                    className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded px-2 py-1.5 text-[11px] text-[#94a3b8] focus:outline-none">
+                    <option value="">Unknown</option>
+                    <option value="critical">Critical</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                ) : (
+                  <span className={`text-[12px] font-semibold capitalize ${
+                    item.severity === "critical" ? "text-[#f87171]" :
+                    item.severity === "high" ? "text-[#fb923c]" :
+                    item.severity === "medium" ? "text-[#fbbf24]" :
+                    item.severity === "low" ? "text-[#34d399]" : "text-[#1e4060]"
+                  }`}>
+                    {item.severity ?? "—"}
+                  </span>
+                )}
+              </DrawerField>
+
+              <DrawerField label="Environment">
+                {editing ? (
+                  <input type="text" value={form.environment ?? ""} onChange={field("environment")}
+                    placeholder="prod / staging / local"
+                    className="w-full bg-[#0c1e30] border border-[#1a3a5c] rounded px-2 py-1.5 text-[11px] text-[#94a3b8] focus:outline-none placeholder:text-[#1e4060]" />
+                ) : (
+                  <span className="text-[12px] text-[#94a3b8]">{item.environment || <span className="text-[#1e4060]">—</span>}</span>
+                )}
+              </DrawerField>
+            </div>
+          )}
 
           {/* Execution mode */}
           <DrawerField label="Execution Mode">

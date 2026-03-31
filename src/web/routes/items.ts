@@ -78,8 +78,10 @@ itemsRouter.post("/", (req, res) => {
   db.prepare(`
     INSERT INTO items (id, project_id, title, description, status, priority, category,
       roi_score, roi_reason, effort, blocked_by, tags, source, execution_mode,
-      assigned_to, acceptance_criteria, notes, attachments, created_at, updated_at)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      assigned_to, acceptance_criteria, notes, attachments,
+      due_date, story_points, user_story, severity, environment,
+      created_at, updated_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     id,
     b.project_id,
@@ -99,6 +101,11 @@ itemsRouter.post("/", (req, res) => {
     b.acceptance_criteria ?? null,
     b.notes ?? null,
     JSON.stringify(b.attachments ?? []),
+    b.due_date ?? null,
+    b.story_points ?? null,
+    b.user_story ?? null,
+    b.severity ?? null,
+    b.environment ?? null,
     now,
     now
   );
