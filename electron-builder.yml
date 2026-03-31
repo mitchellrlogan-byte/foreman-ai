@@ -1,0 +1,66 @@
+appId: com.foreman-ai.app
+productName: Foreman AI
+copyright: Copyright © 2025 Mitchell
+
+directories:
+  output: dist-electron
+  buildResources: electron-app/assets
+
+files:
+  - dist/**/*
+  - web/dist/**/*
+  - node_modules/**/*
+  - electron-dist/main.js
+  - package.json
+
+extraResources:
+  - from: electron-app/assets
+    to: assets
+    filter:
+      - "**/*"
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: electron-app/assets/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Foreman AI
+  installerHeaderIcon: electron-app/assets/icon.ico
+  runAfterFinish: true
+
+mac:
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  icon: electron-app/assets/icon.icns
+  category: public.app-category.developer-tools
+  hardenedRuntime: true
+  entitlements: electron-app/entitlements.mac.plist
+  entitlementsInherit: electron-app/entitlements.mac.plist
+
+dmg:
+  title: "Foreman AI ${version}"
+  background: electron-app/assets/dmg-background.png
+  contents:
+    - x: 130
+      y: 220
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications
+
+linux:
+  target: AppImage
+  icon: electron-app/assets/icon.png
+  category: Development
+
+publish:
+  provider: github
+  owner: mitch
+  repo: foreman-ai
