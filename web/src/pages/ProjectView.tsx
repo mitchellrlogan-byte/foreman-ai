@@ -1,13 +1,18 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import type React from "react";
 import { useParams, Link } from "react-router-dom";
-import { api, type Item, type Project } from "../lib/api";
-import { ItemCard } from "../components/ItemCard";
-import { ItemDrawer } from "../components/ItemDrawer";
-import { StatusBadge } from "../components/StatusBadge";
+import { api, type Item, type Project } from "../lib/api.js";
+import { ItemCard } from "../components/ItemCard.js";
+import { ItemDrawer } from "../components/ItemDrawer.js";
+import { StatusBadge } from "../components/StatusBadge.js";
 
 type ViewMode = "board" | "table";
+type SortKey = "priority" | "roi" | "created";
+type SortDir = "asc" | "desc";
 const BOARD_STATUSES = ["backlog", "ready", "in_progress", "done"] as const;
+
+const STATUS_OPTIONS = ["all", "backlog", "ready", "in_progress", "done"] as const;
+const CATEGORY_OPTIONS = ["all", "feature", "bug", "research", "chore"] as const;
 
 export function ProjectView() {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +21,11 @@ export function ProjectView() {
   const [view, setView] = useState<ViewMode>("board");
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Filter state
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const load = useCallback(() => {
     if (!id) return;
@@ -44,6 +54,13 @@ export function ProjectView() {
   if (!project) return <div className="flex items-center justify-center h-64 text-[#f87171] text-sm">Project not found.</div>;
 
   const visibleItems = items.filter(i => i.status !== "archived");
+
+  const filteredItems = visibleItems.filter(item => {
+    if (search.trim() && !item.title.toLowerCase().includes(search.trim().toLowerCase())) return false;
+    if (statusFilter !== "all" && item.status !== statusFilter) return false;
+    if (categoryFilter !== "all" && item.category !== categoryFilter) return false;
+    return true;
+  });
 
   return (
     <div className="flex flex-col h-full">
@@ -78,12 +95,56 @@ export function ProjectView() {
         </Link>
       </div>
 
+      {/* Filter toolbar */}
+      <div className="border-b border-[#132030] flex items-center px-5 gap-2 flex-shrink-0 py-2">
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search items..."
+          className="bg-[#0a1628] border border-[#1a3a5c] rounded px-2.5 py-1.5 text-[11px] text-[#a8c5da] placeholder:text-[#2a4a6a] focus:outline-none focus:border-[#00b4d8] w-48 transition-colors"
+        />
+        <select
+          value={statusFilter}
+          onChange={e => setStatusFilter(e.target.value)}
+          className="bg-[#0a1628] border border-[#1a3a5c] rounded px-2 py-1.5 text-[11px] text-[#a8c5da] focus:outline-none focus:border-[#00b4d8] transition-colors cursor-pointer"
+        >
+          {STATUS_OPTIONS.map(s => (
+            <option key={s} value={s}>
+              {s === "all" ? "All Statuses" : s === "in_progress" ? "In Progress" : s.charAt(0).toUpperCase() + s.slice(1)}
+            </option>
+          ))}
+        </select>
+        <select
+          value={categoryFilter}
+          onChange={e => setCategoryFilter(e.target.value)}
+          className="bg-[#0a1628] border border-[#1a3a5c] rounded px-2 py-1.5 text-[11px] text-[#a8c5da] focus:outline-none focus:border-[#00b4d8] transition-colors cursor-pointer"
+        >
+          {CATEGORY_OPTIONS.map(c => (
+            <option key={c} value={c}>
+              {c === "all" ? "All Categories" : c.charAt(0).toUpperCase() + c.slice(1)}
+            </option>
+          ))}
+        </select>
+        {(search || statusFilter !== "all" || categoryFilter !== "all") && (
+          <button
+            onClick={() => { setSearch(""); setStatusFilter("all"); setCategoryFilter("all"); }}
+            className="text-[10px] text-[#4b6a8a] hover:text-[#a8c5da] transition-colors px-1"
+          >
+            Clear
+          </button>
+        )}
+        <span className="ml-auto text-[10px] text-[#2a4a6a]">
+          {filteredItems.length} item{filteredItems.length !== 1 ? "s" : ""}
+        </span>
+      </div>
+
       {/* Content */}
       <div className="flex-1 overflow-auto p-5">
         {view === "board" ? (
-          <BoardView items={visibleItems} projectId={id!} onSelect={setSelectedItem} onCreated={handleCreated} onItemsChanged={setItems} onDeleted={handleDeleted} />
+          <BoardView items={filteredItems} projectId={id!} onSelect={setSelectedItem} onCreated={handleCreated} onItemsChanged={setItems} onDeleted={handleDeleted} />
         ) : (
-          <TableView items={visibleItems} onSelect={setSelectedItem} />
+          <TableView items={filteredItems} onSelect={setSelectedItem} />
         )}
       </div>
 
@@ -302,24 +363,60 @@ function QuickAdd({ projectId, status, onCreated }: {
   );
 }
 
+function SortIndicator({ col, sortKey, sortDir }: { col: SortKey; sortKey: SortKey; sortDir: SortDir }) {
+  if (col !== sortKey) return <span className="text-[#2a4a6a] ml-0.5">↕</span>;
+  return <span className="text-[#00b4d8] ml-0.5">{sortDir === "asc" ? "↑" : "↓"}</span>;
+}
+
 function TableView({ items, onSelect }: { items: Item[]; onSelect: (item: Item) => void }) {
-  const sorted = [...items].sort((a, b) => a.priority - b.priority || (b.roi_score ?? 0) - (a.roi_score ?? 0));
+  const [sortKey, setSortKey] = useState<SortKey>("priority");
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  function toggleSort(key: SortKey) {
+    if (sortKey === key) {
+      setSortDir(d => d === "asc" ? "desc" : "asc");
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  }
+
+  const sorted = [...items].sort((a, b) => {
+    let cmp = 0;
+    if (sortKey === "priority") {
+      cmp = a.priority - b.priority;
+    } else if (sortKey === "roi") {
+      cmp = (a.roi_score ?? -1) - (b.roi_score ?? -1);
+    } else if (sortKey === "created") {
+      cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    }
+    return sortDir === "asc" ? cmp : -cmp;
+  });
+
+  const thClass = "flex items-center gap-0.5 cursor-pointer select-none hover:text-[#a8c5da] transition-colors";
 
   return (
     <div className="w-full">
       <div className="grid gap-2 px-2.5 pb-2 text-[9px] font-bold uppercase tracking-[0.8px] text-[#1e4060] border-b border-[#132030]"
-        style={{ gridTemplateColumns: "1fr 100px 50px 50px 80px" }}>
+        style={{ gridTemplateColumns: "1fr 100px 60px 60px 80px 90px" }}>
         <span>Title</span>
         <span>Status</span>
-        <span>Pri</span>
-        <span>ROI</span>
+        <button className={thClass} onClick={() => toggleSort("priority")}>
+          Pri <SortIndicator col="priority" sortKey={sortKey} sortDir={sortDir} />
+        </button>
+        <button className={thClass} onClick={() => toggleSort("roi")}>
+          ROI <SortIndicator col="roi" sortKey={sortKey} sortDir={sortDir} />
+        </button>
         <span>Effort</span>
+        <button className={thClass} onClick={() => toggleSort("created")}>
+          Created <SortIndicator col="created" sortKey={sortKey} sortDir={sortDir} />
+        </button>
       </div>
       {sorted.map(item => (
         <div
           key={item.id}
           className="grid gap-2 px-2.5 py-2.5 items-center border-b border-[#0d1a26] cursor-pointer hover:bg-[#0c1e30] transition-colors"
-          style={{ gridTemplateColumns: "1fr 100px 50px 50px 80px" }}
+          style={{ gridTemplateColumns: "1fr 100px 60px 60px 80px 90px" }}
           onClick={() => onSelect(item)}
         >
           <span className="text-[12px] text-[#bfdbfe] truncate">{item.title}</span>
@@ -327,10 +424,13 @@ function TableView({ items, onSelect }: { items: Item[]; onSelect: (item: Item) 
           <span className="text-[12px] font-bold text-[#0ea5e9]">{item.priority}</span>
           <span className="text-[11px] font-semibold text-[#10b981]">{item.roi_score ?? "—"}</span>
           <span className="text-[10px] text-[#4b6a8a] capitalize">{item.effort ?? "—"}</span>
+          <span className="text-[10px] text-[#2a4a6a]">
+            {new Date(item.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+          </span>
         </div>
       ))}
       {sorted.length === 0 && (
-        <div className="text-[12px] text-[#1e4060] text-center py-8">No items. Add one above.</div>
+        <div className="text-[12px] text-[#1e4060] text-center py-8">No items match your filters.</div>
       )}
     </div>
   );
